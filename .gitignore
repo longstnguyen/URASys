@@ -8,11 +8,19 @@ __pycache__/
 
 # Data and cache
 chatbot/data/*
+src/urasys/data/*
 .data/
 cache/
 backup/
+results/
 
 !chatbot/data/bm25/
+!src/urasys/data/bm25/
+
+# Frontend
+node_modules/
+frontend/.next/
+frontend/.env.local
 
 # service logs
 logs/
@@ -169,3 +177,4 @@ cython_debug/
 
 # macOS system files
 .DS_Store
+*.tsbuildinfo

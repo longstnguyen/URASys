@@ -1,39 +1,64 @@
-# URASys - Unified RAG Application System
+# URASys — Unified Retrieval Agent System
 
 [![Python](https://img.shields.io/badge/Python-3.13-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
-[![Google ADK](https://img.shields.io/badge/Google_ADK-Latest-red.svg)](https://github.com/google/genai-agent-dev-kit)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green.svg)](https://fastapi.tiangolo.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
+[![CopilotKit](https://img.shields.io/badge/CopilotKit-latest-purple.svg)](https://copilotkit.ai/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ---
 
 ## Overview
 
-URASys is a production-ready Retrieval-Augmented Generation (RAG) system that combines the power of **multi-agent architecture**, **hybrid search**, and **advanced reasoning** to provide accurate, context-aware responses from your knowledge base.
-
-### Why URASys?
-
-- **Multi-Agent Architecture**: Parallel FAQ and Document search agents coordinated by an intelligent manager agent
-- **Hybrid Search**: Combines BM25 lexical search with dense vector embeddings for optimal retrieval
-- **Agent Reasoning**: Built on Google ADK with sophisticated query decomposition and result synthesis
-- **Bilingual Support**: Optimized for both English and Vietnamese queries
-- **Document Intelligence**: Semantic chunking and context-aware document processing
-- **Production Ready**: FastAPI backend with MCP (Model Context Protocol) servers
+URASys is a multi-agent Retrieval-Augmented Generation (RAG) system that handles **ambiguous and unanswerable questions** through sophisticated iterative retrieval. It combines a Manager LLM with two specialised Sub-Agents (FAQ and Document), hybrid BM25+dense retrieval, and RRF fusion.
 
 ---
 
-## Key Features
+## Architecture
 
-| Feature | Description |
-|---------|-------------|
-| **Multi-Agent Coordination** | Manager agent orchestrates parallel FAQ and Document search agents for comprehensive results |
-| **Hybrid Retrieval** | BM25 + Vector embeddings for superior search accuracy |
-| **Semantic Chunking** | Intelligent document segmentation preserving context and meaning |
-| **Context Augmentation** | Automatic FAQ generation and document context extraction |
-| **Conversational Memory** | Maintains dialogue context for natural follow-up questions |
-| **Query Decomposition** | Breaks complex queries into focused sub-queries |
-| **Result Synthesis** | Aggregates and ranks results from multiple sources |
-| **Bilingual Processing** | Native support for Vietnamese and English |
+```
+User Query
+    │
+    ▼
+Manager Agent (Gemini 2.5 Flash)
+    │  Query Decomposition → sub-queries
+    ▼
+┌─────────────────────────────────────────┐
+│  For each sub-query (parallel):         │
+│                                         │
+│  FAQ Sub-Agent          Doc Sub-Agent   │
+│  ┌────────────┐         ┌────────────┐  │
+│  │ LLM loop   │         │ LLM loop   │  │
+│  │ faq_tool   │         │ doc_tool   │  │
+│  │ (≤3 tries) │         │ (≤3 tries) │  │
+│  └─────┬──────┘         └─────┬──────┘  │
+│        │ Hybrid RRF           │          │
+│        │ (BM25 + Dense)       │          │
+│        ▼                      ▼          │
+│  grounded text           grounded text  │
+└─────────────────────────────────────────┘
+    │
+    ▼
+Manager synthesises PATH A/B/C/D response
+```
 
+**PATH A** — Direct answer found  
+**PATH B** — Query too broad → ask clarifying question  
+**PATH C** — Vague query → refine and retry (up to 4 Manager attempts)  
+**PATH D** — Off-topic or exhausted → honest no-answer  
+
+---
+
+## Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 15 + CopilotKit |
+| Manager Agent | CopilotKit `useCopilotAction` + Gemini 2.5 Flash |
+| Sub-Agents | `google-genai` SDK, iterative tool-call loops |
+| Retrieval | Milvus (dense) + BM25 → RRF fusion |
+| Backend API | FastAPI (port 8005) |
+| Embedding | OpenAI `text-embedding-3-small` |
 
 ---
 
@@ -42,220 +67,98 @@ URASys is a production-ready Retrieval-Augmented Generation (RAG) system that co
 ### Prerequisites
 
 - Python 3.13+
-- OpenAI API Key
-- Google Gemini API Key
-- Milvus Cloud Account (free tier available at [zilliz.com](https://zilliz.com/cloud))
+- Node.js 18+
+- OpenAI API Key  
+- Google Gemini API Key  
+- Milvus Cloud account ([zilliz.com](https://zilliz.com/cloud))
 
-### 1. Clone and Setup Environment
+### 1. Setup Python Environment
 
 ```bash
-# Clone repository
-git clone https://github.com/quin210/urasys.git
-cd urasys
-
-# Create virtual environment
 python -m venv .venv
-source .venv/bin/activate  # macOS/Linux
-# On Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
+source .venv/bin/activate
+pip install -e .
 ```
 
 ### 2. Configure Environment Variables
 
-Create `.env` file in the project root:
+Create `environments/.env`:
 
 ```bash
-# API Keys
-OPENAI_API_KEY=sk-your-openai-key
-GEMINI_API_KEY=your-gemini-key
-
-# Milvus Cloud Configuration
+OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=...
 MILVUS_CLOUD_URI=https://your-cluster.api.gcp-us-west1.zillizcloud.com
-MILVUS_CLOUD_TOKEN=your-milvus-token
-
-# Optional: Model Configuration
-EMBEDDING_MODEL=text-embedding-3-small
-LLM_MODEL=gemini-2.5-flash
+MILVUS_CLOUD_TOKEN=...
+MILVUS_COLLECTION_FAQ_NAME=faq_data
+MILVUS_COLLECTION_DOCUMENT_NAME=document_data
 ```
 
-### 4. Run the Application
-To run this command, you need to run 4 different terminal commands in parallel:
-**Terminal 1 - FAQ MCP Server:**
+### 3. Build the Index
+
 ```bash
-source .venv/bin/activate
-python -m chatbot.server.faq_server.server_app
-# Running on http://localhost:8001
+PYTHONPATH=src python -m urasys.workflow.build_index
 ```
 
-**Terminal 2 - Document MCP Server:**
+### 4. Start the Services
+
+Run each in a separate terminal:
+
+**Terminal 1 — FAQ MCP Server (port 8011):**
 ```bash
-source .venv/bin/activate
-python -m chatbot.server.document_server.server_app
-# Running on http://localhost:8002
+PYTHONPATH=src python -m urasys.server.faq_server.server_app
 ```
 
-**Terminal 3 - MCP Sever:**
+**Terminal 2 — Document MCP Server (port 8012):**
 ```bash
-source .venv/bin/activate
-python run_app.py
+PYTHONPATH=src python -m urasys.server.document_server.server_app
 ```
 
-**Terminal 4 -  ADK Web Interface:**
+**Terminal 3 — CopilotKit Backend (port 8005):**
 ```bash
-source .venv/bin/activate
-adk web --port 8010 --host 0.0.0.0 --reload chatbot/core/
+PYTHONPATH=src python -m urasys.server.copilotkit_server.server_app
 ```
 
-**Done!** Access [http://localhost:8000/docs](http://localhost:8000/docs) to explore the API.
-
----
-### 5. Access the System
-
-- **ADK Web UI**: http://localhost:8010
-- **API Documentation**: http://localhost:8000/docs (if using `run_app.py`)
-
----
-
-## Usage Examples
-
-### Example 1: Simple Query
-
-```python
-# Query via API
-import requests
-
-response = requests.post(
-    "http://localhost:8010/run_sse",
-    json={
-        "appName": "agents",
-        "newMessage": "What are the admission requirements?"
-    }
-)
+**Terminal 4 — Next.js Frontend (port 3000):**
+```bash
+cd frontend && npm install && npm run dev
 ```
 
-### Example 2: Follow-up Questions
-
-The system maintains conversation context:
-
-```
-User: "What are the scholarship options?"
-Agent: [Lists scholarship programs A, B, C...]
-
-User: "Tell me more about program B"
-Agent: [Provides detailed info about program B, understanding context]
-```
-
-### Example 3: Complex Query
-
-```
-User: "Compare the engineering and business programs, 
-       including admission requirements and career prospects"
-       
-Agent: [Decomposes into sub-queries, searches both domains, 
-        synthesizes comprehensive comparison]
-```
+Open **http://localhost:3000**
 
 ---
 
 ## Project Structure
 
 ```
-urasys/
-├── chatbot/
-│   ├── config/                    # System configuration
-│   │   ├── models_config.json     # Model settings
-│   │   └── system_config.py       # Environment config
-│   │
-│   ├── core/                      # Core functionality
-│   │   ├── agents/                # Multi-agent system
-│   │   │   ├── agent.py           # Manager agent
-│   │   │   ├── tools.py           # Agent tools
-│   │   │   ├── prompt.py          # Agent prompts
-│   │   │   └── sub_agents/        # Specialized agents
-│   │   │       ├── faq_search_agent/
-│   │   │       └── document_search_agent/
-│   │   │
-│   │   ├── model_clients/         # LLM & Embedding clients
-│   │   │   ├── llm/               # Language model clients
-│   │   │   ├── embedder/          # Embedding clients
-│   │   │   └── bm25.py            # BM25 implementation
-│   │   │
-│   │   └── retriever/             # Retrieval systems
-│   │       ├── faq_retriever.py
-│   │       └── document_retriever.py
-│   │
-│   ├── indexing/                  # Document processing
-│   │   ├── context_document/      # Document chunking & processing
-│   │   │   ├── semantic_chunk.py  # Semantic chunking
-│   │   │   ├── extract_context.py # Context extraction
-│   │   │   └── augment_context.py # Context augmentation
-│   │   │
-│   │   └── faq/                   # FAQ processing
-│   │       ├── generate_document.py
-│   │       ├── expand_document.py
-│   │       └── augment_document.py
-│   │
-│   ├── server/                    # MCP Servers
-│   │   ├── faq_server/            # FAQ retrieval server (port 8001)
-│   │   ├── document_server/       # Document retrieval server (port 8002)
-│   │   └── index_server/          # Indexing server
-│   │
-│   ├── prompts/                   # Prompt templates
-│   │   ├── indexing/              # Indexing prompts
-│   │   └── query/                 # Query prompts
-│   │
-│   ├── utils/                     # Utilities
-│   │   ├── database_clients/      # DB clients
-│   │   │   ├── milvus/            # Milvus implementation
-│   │   │   └── lancedb/           # LanceDB implementation
-│   │   └── embeddings.py          # Embedding utilities
-│   │
-│   └── workflow/                  # Workflows
-│       ├── build_index.py         # Indexing workflow
-│       └── chatbot_inference.py   # Inference workflow
-│
-├── dataset/                       # Sample datasets
-├── environments/                  # Environment configs
-├── .env                          # Environment variables
-├── requirements.txt              # Python dependencies
-├── run_app.py                    # Main application
-└── README.md                     # This file
+URASys/
+├── src/urasys/
+│   ├── config/                    # System & model configuration
+│   ├── core/
+│   │   ├── agents/                # Manager agent (legacy ADK wrappers — unused)
+│   │   ├── model_clients/         # LLM, Embedder, BM25 clients
+│   │   └── retriever/             # FAQ & Document retrievers (hybrid RRF)
+│   ├── indexing/                  # Document chunking, FAQ generation
+│   ├── prompts/
+│   │   ├── indexing/              # Prompts for index-time operations
+│   │   └── query/                 # Sub-agent system prompts (paper Fig. 3/4)
+│   ├── server/
+│   │   ├── faq_server/            # MCP FAQ retrieval (port 8011)
+│   │   ├── document_server/       # MCP document retrieval (port 8012)
+│   │   ├── copilotkit_server/     # Main backend + sub-agent LLM loops (port 8005)
+│   │   └── index_server/          # Index management
+│   ├── utils/                     # DB clients (Milvus/LanceDB), embeddings
+│   └── workflow/                  # build_index, chatbot_inference
+├── frontend/                      # Next.js + CopilotKit chat UI
+├── datasets/                      # Evaluation datasets
+├── scripts/                       # Utility scripts
+└── environments/                  # .env files
 ```
 
 ---
 
-## Configuration
+## Key Design Decisions
 
-### Model Configuration
-
-Edit `chatbot/config/models_config.json`:
-
-```json
-{
-  "embedder": {
-    "provider": "openai",
-    "model": "text-embedding-3-small",
-    "dimension": 1536
-  },
-  "llm": {
-    "provider": "google",
-    "model": "gemini-2.5-flash",
-    "temperature": 0.2
-  },
-  "retrieval": {
-    "top_k": 5,
-    "similarity_threshold": 0.7
-  }
-}
-```
-
-### System Configuration
-
-Customize `chatbot/config/system_config.py` for:
-- Database collection names
-- BM25 parameters
-- Chunking strategies
-- Agent retry limits
+- **Sub-Agents are LLM loops, not simple retrievers.** Each sub-agent issues tool calls iteratively (up to 3 rounds), reformulating its search query if results are unsatisfactory. This matches the paper's Algorithm 1.
+- **Manager only sees grounded text.** The `faq_answer` / `doc_answer` fields from sub-agents are what the Manager uses to decide PATH A/B/C/D — not raw chunk lists.
+- **No ADK dependency.** The system was originally built with Google ADK; inference now runs via `google-genai` SDK directly with CopilotKit managing the Manager Agent turn.
 

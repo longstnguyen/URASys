@@ -1,0 +1,98 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "urasys"
+version = "0.1.0"
+description = "Unified Retrieval Agent-Based System for Ambiguous and Unanswerable Question Answering"
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [
+    { name = "URA Research Group, HCMUT" }
+]
+keywords = ["RAG", "QA", "multi-agent", "retrieval", "LLM"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    # Web framework
+    "fastapi==0.115.12",
+    "uvicorn[standard]>=0.34.0",
+    "python-multipart==0.0.20",
+    "pydantic==2.11.4",
+    "environs==14.1.1",
+    "python-dotenv==1.1.0",
+
+    # AI / LLM
+    "openai==1.77.0",
+    "copilotkit>=0.1.28",
+
+    # Vector DB
+    "pymilvus==2.5.6",
+    "milvus-model==0.2.12",
+
+    # NLP & text processing
+    "tiktoken==0.9.0",
+    "langdetect==1.0.9",
+
+    # Data
+    "pandas==2.2.3",
+    "numpy",
+    "scipy",
+
+    # Utilities
+    "loguru==0.7.3",
+    "tqdm==4.67.1",
+    "requests==2.31.0",
+]
+
+[project.optional-dependencies]
+server = [
+    "fastmcp",
+    "minio==7.1.13",
+]
+ui = [
+    "streamlit==1.29.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.4",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+urasys-faq-server        = "urasys.server.faq_server.server_app:main"
+urasys-doc-server        = "urasys.server.document_server.server_app:main"
+urasys-index-server      = "urasys.server.index_server.server_app:main"
+urasys-copilotkit-server = "urasys.server.copilotkit_server.server_app:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/urasys"]
+
+# ── Ruff (linter + formatter) ────────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+# ── Mypy ─────────────────────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.13"
+ignore_missing_imports = true
+warn_unused_ignores = true
+
+# ── Pytest ────────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

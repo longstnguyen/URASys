@@ -1,0 +1,1775 @@
+% This must be in the first 5 lines to tell arXiv to use pdfLaTeX, which is strongly recommended.
+\pdfoutput=1
+% In particular, the hyperref package requires pdfLaTeX in order to break URLs across lines.
+\documentclass[11pt]{article}
+
+% Change "review" to "final" to generate the final (sometimes called camera-ready) version.
+% Change to "preprint" to generate a non-anonymous version with page numbers.
+\usepackage[final]{acl}
+
+% Standard package includes
+\usepackage{times}
+\usepackage{latexsym}
+
+% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
+\usepackage[T1]{fontenc}
+
+\DeclareUnicodeCharacter{0306}{\u{}}
+\usepackage[ruled,vlined]{algorithm2e}
+\setlength{\algomargin}{5pt}      
+% Existing packages (keep)
+\usepackage{listings}
+
+\usepackage[most]{tcolorbox}
+
+% ---- Style gốc cho mọi bubble ----
+\tcbset{
+  bubblebase/.style={
+    enhanced,
+    breakable,     % <-- tự động ngắt trang
+    before skip=3pt,
+    after skip=3pt,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    arc=10pt,
+    boxrule=0pt
+  }
+}
+
+% ---- Các bubble kế thừa style gốc ----
+\tcbset{
+  userbubble/.style={
+    bubblebase,
+    colback=blue!5,
+    colframe=blue!5
+  },
+  thoughtbubble/.style={
+    bubblebase,
+    colback=gray!15,
+    colframe=gray!15
+  },
+  toolbubble/.style={
+    bubblebase,
+    colback=white,
+    colframe=black!20,
+    boxrule=0.5pt
+  },
+  answerbubble/.style={
+    bubblebase,
+    colback=gray!10,
+    colframe=gray!10
+  }
+}
+
+% ---- Tag Thought ----
+\newcommand{\thoughttag}{%
+  \tcbox[
+    colback=blue!60,
+    colframe=blue!60,
+    boxrule=0pt,
+    arc=4pt,
+    left=4pt, right=4pt, top=1pt, bottom=1pt,
+    before skip=0pt,
+    after skip=2pt
+  ]{\textbf{Thought}}%
+}
+
+
+
+\usepackage{caption}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{colortbl}
+% \usepackage{pgf-pie}
+% \usepackage{wheelchart}
+% \usepackage{tikz}
+% \usetikzlibrary{patterns}
+% \usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{multirow} 
+% A*-friendly Bash-style prompt syntax highlighting
+\lstdefinelanguage{promptlang}{
+    morekeywords={if, else, for, in, while, return, def}, 
+    sensitive=false,
+    morecomment=[l]{\#},
+    morestring=[b]",
+    basicstyle=\ttfamily\small,
+    commentstyle=\color{gray!60}\itshape,
+    stringstyle=\color{teal!60!black},
+    keywordstyle=\color{black},
+    showstringspaces=false,
+    breaklines=true,
+    literate=
+     *{0}{{{\color{blue!80!black}0}}}{1}
+      {1}{{{\color{blue!80!black}1}}}{1}
+      {2}{{{\color{blue!80!black}2}}}{1}
+      {3}{{{\color{blue!80!black}3}}}{1}
+      {4}{{{\color{blue!80!black}4}}}{1}
+      {5}{{{\color{blue!80!black}5}}}{1}
+      {6}{{{\color{blue!80!black}6}}}{1}
+      {7}{{{\color{blue!80!black}7}}}{1}
+      {8}{{{\color{blue!80!black}8}}}{1}
+      {9}{{{\color{blue!80!black}9}}}{1}
+      {:}{{{\color{blue!80!black}:}}}{1}
+      {,}{{{\color{blue!80!black},}}}{1}
+      {"}{{{\color{teal!60!black}"}}}{1}
+}
+
+\usepackage{soul}
+
+% Định nghĩa nhiều màu highlight
+\sethlcolor{yellow!30} % mặc định
+\newcommand{\hlb}[1]{\sethlcolor{NavyBlue!10}\hl{#1}}   % ambiguous keyword
+\newcommand{\hlg}[1]{\sethlcolor{OliveGreen!10}\hl{#1}}    % clarification options
+\newcommand{\hlr}[1]{\sethlcolor{BrickRed!10}\hl{#1}}     % unanswerable reason
+
+
+% Define styled listing environment
+\newtcblisting{promptblockup}{
+    listing only,
+    listing options={
+        language=promptlang,
+        basicstyle=\ttfamily\footnotesize,
+        breaklines=true,
+        columns=fullflexible,
+        frame=none,
+        showstringspaces=false,
+        tabsize=2
+    },
+    colback=gray!3,
+    colframe=gray!30,
+    arc=8pt,
+    outer arc=8pt,
+    boxrule=0.5pt,
+    left=4pt,
+    right=4pt,
+    top=0pt,
+    bottom=0pt,
+    enhanced,
+    sharp corners=south,
+    borderline south={0pt}{0pt}{white},
+}
+\usepackage{subcaption}
+% Define styled listing environment
+\newtcblisting{promptblockdown}{
+    listing only,
+    listing options={
+        language=promptlang,
+        basicstyle=\ttfamily\footnotesize,
+        breaklines=true,
+        columns=fullflexible,
+        frame=none,
+        showstringspaces=false,
+        tabsize=2
+    },
+    colback=gray!3,
+    colframe=gray!30,
+    arc=8pt,
+    outer arc=8pt,
+    boxrule=0.5pt,
+    left=4pt,
+    right=4pt,
+    top=0pt,
+    bottom=0pt,
+    enhanced,
+    sharp corners=north,
+    borderline north={0pt}{0pt}{white},
+}
+
+% Define styled listing environment
+\newtcblisting{promptblock}{
+    listing only,
+    listing options={
+        language=promptlang,
+        basicstyle=\ttfamily\footnotesize,
+        breaklines=true,
+        columns=fullflexible,
+        frame=none,
+        showstringspaces=false,
+        tabsize=2
+    },
+    colback=gray!3,
+    colframe=gray!30,
+    arc=8pt,
+    outer arc=8pt,
+    boxrule=0.5pt,
+    left=4pt,
+    right=4pt,
+    top=0pt,
+    bottom=0pt,
+    enhanced,
+}
+
+
+% For Vietnamese characters
+%\usepackage[T5]{fontenc}
+% See https://www.latex-project.org/help/documentation/encguide.pdf for other character sets
+
+% This assumes your files are encoded as UTF8
+\usepackage[utf8]{inputenc}
+
+% This is not strictly necessary, and may be commented out,
+% but it will improve the layout of the manuscript,
+% and will typically save some space.
+\usepackage{microtype}
+
+% This is also not strictly necessary, and may be commented out.
+
+% However, it will improve the aesthetics of text in
+% the typewriter font.
+\usepackage{inconsolata}
+
+%Including images in your LaTeX document requires adding
+%additional package(s)
+\usepackage{graphicx}
+% Gói toán học cơ bản và mở rộng
+\usepackage{amsmath}    % Cung cấp môi trường toán học nâng cao
+\usepackage{amssymb}    % Ký hiệu toán học (symbols) mở rộng
+\usepackage{amsthm}     % Định nghĩa và trình bày các môi trường như Định lý, Bổ đề
+\usepackage{mathtools}  % Mở rộng amsmath, thêm nhiều tính năng như ngoặc tự động
+\usepackage{physics}    % Cú pháp tắt cho đạo hàm, tích phân, trị tuyệt đối, v.v.
+\usepackage{bm}         % Hỗ trợ ký hiệu vector và ma trận in đậm
+\usepackage{mathrsfs}   % Ký hiệu chữ viết tay đẹp (calligraphy)
+\usepackage{bbm}        % Ký hiệu hàm đặc trưng (1 với double bar)
+\usepackage{nicefrac}   % Phân số đẹp dạng gọn
+\usepackage{xfrac}      % Phân số inline nhỏ (giống nicefrac nhưng linh hoạt hơn)
+
+% If the title and author information does not fit in the area allocated, uncomment the following
+%
+%\setlength\titlebox{<dim>}
+%
+% and set <dim> to something 5cm or larger.
+
+\title{
+% Clarify When Needed, Answer When Ready: A Unified-Retrievael Agent-Based System for Handling Ambiguous and Unanswerable Question Answeing
+When in Doubt, Ask First: A Unified Retrieval Agent-Based System for Ambiguous and Unanswerable Question Answering
+
+%Serving Bahnaric Communities with a Hybrid BARTPho-Based Machine Translation System: Data Augmentation and Transfer Learning
+}
+
+% Author information can be set in various styles:
+% For several authors from the same institution:
+% \author{Author 1 \and ... \and Author n \\
+%         Address line \\ ... \\ Address line}
+        % Author 1 \\ {\bf Author 2} \\ ... \\ {\bf Author n} \\
+% For authors from different institutions:
+% \author{Author 1 \\ Address line \\  ... \\ Address line
+%         \And  ... \And
+%         Author n \\ Address line \\ ... \\ Address line}
+% To start a separate ``row'' of authors use \AND, as in
+% \author{Author 1 \\ Address line \\  ... \\ Address line
+%         \AND
+%         Author 2 \\ Address line \\ ... \\ Address line \And
+%         Author 3 \\ Address line \\ ... \\ Address line}
+
+% \author{Long S. T. Nguyen \\
+%   Affiliation / Address line 1 \\
+%   Affiliation / Address line 2 \\
+%   Affiliation / Address line 3 \\
+%   \texttt{email@domain} \\\And
+%   Second Author \\
+%   Affiliation / Address line 1 \\
+%   Affiliation / Address line 2 \\
+%   Affiliation / Address line 3 \\
+%   \texttt{email@domain} \\}
+%\textsuperscript{1} 
+\author{
+ \textbf{Long S. T. Nguyen\textsuperscript{1,2}}, \textbf{Quynh T. N. Vo\textsuperscript{1,2}}, \textbf{Hung C. Luu\textsuperscript{1,2}},
+ \textbf{Tho T. Quan\textsuperscript{1,2*}} \\ \\
+ \textsuperscript{1}URA Research Group, Ho Chi Minh City University of Technology (HCMUT), Vietnam\\
+  \textsuperscript{2}Vietnam National University, Ho Chi Minh City, Vietnam 
+\\
+ \small{
+   \textbf{\textsuperscript{*}Correspondence:} \href{mailto:qttho@hcmut.edu.vn}{qttho@hcmut.edu.vn}
+   % \texttt{\{long.nguyencse2023,tran.lethanhbao,huong.nguyenphuocngoc,quynh.vo01,phong.nguyenhuunam,qttho\}@hcmut.edu.vn}
+ }
+ % \texttt{}}
+}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Large Language Models (LLMs) have shown strong capabilities in Question Answering (QA), but their effectiveness in high-stakes, closed-domain settings is often constrained by hallucinations and limited handling of vague or underspecified queries. These challenges are especially pronounced in Vietnamese, a low-resource language with complex syntax and strong contextual dependence, where user questions are often short, informal, and ambiguous. We introduce the Unified Retrieval Agent-Based System (URASys), a QA framework that combines agent-based reasoning with dual retrieval under the Just Enough principle to address standard, ambiguous, and unanswerable questions in a unified manner. URASys performs lightweight query decomposition and integrates document retrieval with a question–answer layer via a two-phase indexing pipeline, engaging in interactive clarification when intent is uncertain and explicitly signaling unanswerable cases to avoid hallucination. We evaluate URASys on Vietnamese and English QA benchmarks spanning single-hop, multi-hop, and real-world academic advising tasks, and release new dual-language ambiguous subsets for benchmarking interactive clarification. Results show that URASys outperforms strong retrieval-based baselines in factual accuracy, improves unanswerable handling, and achieves statistically significant gains in human evaluations for clarity and trustworthiness. All code and datasets are publicly available at \url{https://github.com/ura-hcmut/URASys}.
+\end{abstract}
+
+
+
+
+
+
+
+
+
+
+% \begin{abstract}
+% Large Language Models (LLMs) have achieved impressive results in various natural language processing tasks, particularly Question-Answering (QA) \cite{RASOOL2024100083}. However, their deployment in educational settings remains challenging due to the risk of hallucinated answers and the inability to handle vague or underspecified queries. These issues are further amplified in Vietnamese, a low-resource language with rich syntactic variation and strong context dependence. Educational queries in Vietnamese are often short, informal, and ambiguous, making them especially difficult for conventional QA systems. We present the Unified Retrieval Agent-Based System (URASys), a QA framework that integrates retrieval-augmented generation with multi-agent coordination and interactive clarification. Given a user query, URASys decomposes it into sub-queries handled by two specialized retrieval agents: one targets a curated Frequently Asked Questions (FAQ) collection, while the other searches a structured document corpus. A central manager agent evaluates the combined evidence and, when necessary, proactively engages the user for clarification rather than generating speculative responses. To support efficient hybrid retrieval, URASys employs an effective LLM-based chunk-and-title indexing strategy that avoids the complexity of graph-based infrastructure. We evaluate URASys on a range of QA benchmarks, including open-domain and multi-hop datasets in both Vietnamese and English, as well as a real-world dataset collected from university admissions advising. Experimental results and human evaluations demonstrate that URASys consistently outperforms strong traditional and advanced RAG baselines in both factual accuracy and user trust.
+% \end{abstract}
+
+\section{Introduction}
+
+\begin{table*}[t]
+\centering
+\caption{Illustrative examples showing \textit{User} (U) and \textit{URASys} (S) handling different query types in educational QA.}
+\begin{tabular}{@{}p{0.375\textwidth}p{0.54\textwidth}@{}}
+\toprule
+\textbf{Scenario} & \textbf{Example} \\
+\midrule
+
+\textbf{Normal:} \hlg{direct}, \hlg{well-specified} question &
+\textbf{U:} What are the \hlg{prerequisites} for \hlg{Machine Learning~101}?\newline
+\textbf{S:} Introduction to Programming and Basic Statistics. \\
+\addlinespace[5pt]
+
+\textbf{Ambiguous:} questions with multiple interpretations, insufficient context, or \hlb{overly broad scope} \cite{wang-etal-2023-know}&
+\textbf{U:} How much is the \hlb{fee} for this program?\newline
+\textbf{S:} The program has a tuition fee, a lab fee, and a registration fee. Could you clarify which one?\newline
+\textbf{U:} Tuition.\newline
+\textbf{S:} Tuition fee is 2\,000~USD per semester. \\
+\addlinespace[5pt]
+
+\textbf{Unanswerable:} specific query with \hlr{no matching information} in the database &
+\textbf{U:} What is the course instructor’s office \hlr{phone number}?\newline
+\textbf{S:} Sorry, our advising database stores only email addresses and no phone numbers. \\
+\bottomrule
+\end{tabular}
+\label{tab:example}
+\end{table*}
+
+\textit{Large Language Models} (LLMs) have become a cornerstone of modern \textit{Question Answering} (QA) systems~\cite{RASOOL2024100083}, demonstrating strong fluency across diverse tasks. As their capabilities expand, QA systems powered by LLMs are increasingly deployed in high-stakes, closed-domain environments such as academic advising, where answers must remain precise and context-aware~\cite{10433480}. Questions on tuition fees, course prerequisites, or institutional policies often carry significant consequences: errors can delay graduation, incur financial penalties, and mislead enrollment decisions, making factual grounding and contextual sensitivity essential~\cite{10.1007/978-981-96-4285-4_7}. This challenge is amplified in low-resource, nuance-rich languages such as Vietnamese, where syntactic variation and strong context dependence complicate interpretation and motivate creating dedicated datasets and benchmarks~\cite{10.1145/3675781}. Queries are frequently short, informal, and underspecified, reflecting natural advising conversations and exposing limitations of conventional QA pipelines without interactive clarification.
+
+
+Although LLMs provide strong generative capabilities, they are inherently probabilistic and prone to \textit{hallucination} when facing vague or incomplete questions~\cite{li-etal-2024-dawn}. \textit{Retrieval-Augmented Generation} (RAG)~\cite{10.5555/3495724.3496517} mitigates this by grounding responses in external evidence, yet most RAG pipelines assume queries are fully specified and answerable. They often retrieve loosely related passages and attempt to answer despite insufficient evidence, rarely engaging in targeted clarification~\cite{10.1145/3637528.3671470}. Such behavior is especially problematic in advising contexts where users expect not only answers but reliable guidance. Recent advances such as IRCoT~\cite{trivedi-etal-2023-interleaving}, MiniRAG~\cite{fan2025minirag}, LightRAG~\cite{guo2024lightrag}, NodeRAG~\cite{xu2025noderag}, and HippoRAG~\cite{liu2025hoprag} improve evidence synthesis and multi-hop retrieval through interleaved reasoning and graph-based routing, but they still treat queries as static inputs and lack mechanisms for decomposition-driven understanding, interactive clarification, and explicit \textit{unanswerable handling}. These gaps highlight the need for a reasoning-driven QA framework that can jointly decide when to answer, when to clarify, and when to explicitly signal no-answer without over-relying on retrieval confidence.
+
+
+
+To address these gaps, we introduce the \textit{\textbf{U}nified \textbf{R}etrieval \textbf{A}gent-Based \textbf{Sys}tem} (URASys), a QA framework for closed-domain settings with underspecified or critical queries. Unlike prior RAG pipelines, URASys leverages agent-based reasoning and a dual retrieval architecture under a \textit{Just Enough} paradigm. It prioritizes understanding before answering, engages in clarification when user intent is ambiguous, and explicitly signals unanswerable when evidence is insufficient rather than hallucinating. A central \textit{Manager Agent} performs query decomposition to infer intent and split complex questions into sub-queries for better evidence aggregation. It coordinates two specialized retrieval agents: (i) a \textit{Document Retrieval Agent} over a hybrid \textit{chunk-and-title} corpus index for lexical and semantic search, and (ii) a \textit{FAQ Retrieval Agent} querying an automatically generated \textit{Frequently Asked Questions} (FAQs) repository created via an \textit{ask-and-augment} procedure. This two-phase indexing pipeline transforms raw documents into both evidence chunks and a standardized question–answer layer, enabling URASys to combine fast FAQ-style lookup with grounded document reasoning in a unified architecture.
+
+URASys jointly addresses three critical QA scenarios: (1) resolving ambiguous queries via interactive clarification, (2) handling unanswerable cases through cross-source evidence synthesis and reasoning-driven decisions, and (3) answering standard queries with grounded single-hop or multi-hop reasoning, as illustrated in Table~\ref{tab:example}. The clarification loop mirrors human advisory behavior, while the dual retrieval pipeline reflects the natural workflow of consulting FAQs and policy documents. Our contributions are summarized as follows.
+
+\begin{itemize}
+    \item We introduce URASys, an agent-based QA framework that integrates query decomposition, dual retrieval, and interactive clarification under a Just Enough principle. This paradigm prioritizes understanding over generation, enabling unified handling of standard, ambiguous, and unanswerable queries while improving accuracy and robustness in closed-domain QA. We further propose a two-phase indexing pipeline for dual retrieval, effective in low-resource languages without requiring complex graph infrastructure.
+
+    \item We comprehensively evaluate URASys on Vietnamese and English QA benchmarks covering single-hop and multi-hop closed-domain tasks and a real-world academic advising dataset, including unanswerable subsets. URASys outperforms both traditional and advanced RAG baselines in factual accuracy.
+
+
+    \item We release new ambiguous subsets targeting interactive clarification, enabling systematic evaluation of underspecified queries in both English and Vietnamese and establishing a benchmark for this underexplored setting.
+
+    \item We conduct real-world human evaluations with end users interacting with the deployed system, demonstrating practical effectiveness in live advising workflows and statistically significant gains in user satisfaction. These results highlight the broader applicability of URASys to other high-stakes, closed-domain QA scenarios beyond academic advising.
+\end{itemize}
+
+
+
+% \subsection{Educational QA Systems}
+
+% QA systems are increasingly used in educational contexts such as university admissions and academic advising, where users expect timely and accurate responses to policy-related queries \cite{10.1007/978-981-96-4285-4_7}. Traditional systems rely on natural language understanding techniques like intent classification and entity recognition to map questions to predefined answers~\cite{Aloqayli2023IntelligentCF}, with platforms like Rasa~\cite{Bocklisch2017RasaOS} widely adopted in rule-based FAQ deployments. However, these systems often struggle with informal phrasing, ambiguous intent, or out-of-scope input~\cite{9648677,NGUYEN2021100036}. To address these issues, recent approaches fine-tune open-source LLMs for educational domains or adopt lightweight RAG pipelines~\cite{llamachatbot,10.1145/3627508.3638293}. Others use sequence-to-sequence architectures~\cite{CHANDRA2019367} or commercial LLM APIs~\cite{Nguyen2022AIPoweredUD}. While these methods improve fluency, two major challenges remain: hallucinations when retrieval is weak~\cite{10.1145/3637528.3671470}, and the lack of clarification mechanisms for vague or underspecified queries. These limitations are particularly problematic in education, where queries are often short, informal, and highly context-dependent.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{latex/figures/URASys_1.pdf}
+    \caption{Overview of the URASys framework. Each user query is decomposed into $n$ sub-queries, handled by parallel agent teams consisting of FAQ and document agents. Retrieved evidence is aggregated and used to generate a final answer, with optional clarification or explicit no-answer signaling if needed.}
+    \label{fig:agent}
+\end{figure*}
+
+\section{Related Works}
+
+\subsection{RAG and Recent Advances}
+RAG has emerged as a promising approach for improving factual accuracy in QA systems by grounding LLM outputs in retrieved evidence~\cite{10.5555/3495724.3496517}. Standard pipelines often combine dense retrievers, token-based methods such as BM25, or hybrid approaches with generative models to produce context-aware responses~\cite{10.1145/3637528.3671470}, but typically assume well-formed inputs and underperform when queries are vague or underspecified. Recent studies propose advanced retrieval-reasoning architectures: IRCoT~\cite{trivedi-etal-2023-interleaving} alternates retrieval and reasoning in multi-step QA; LightRAG~\cite{guo2024lightrag} and MiniRAG~\cite{fan2025minirag} enhance indexing with graph structures and semantic-aware topologies; NodeRAG~\cite{xu2025noderag} integrates heterogeneous graphs for structured evidence; HippoRAG~\cite{gutierrez2024hipporag} employs hierarchical memory to capture long-range dependencies. While these models excel on benchmarks, they rely on high-quality inputs and complex infrastructure, posing challenges in resource-constrained, high-stakes domains such as educational QA. Critically, they lack mechanisms for interactive clarification and explicit unanswerable handling, motivating architectures combining modular retrieval with clarification-first interaction for ambiguous and underspecified queries.
+
+
+
+\subsection{Interactive Clarification, Unanswerable Handling, and Multi-Agent QA}
+Most QA systems treat user queries as fully specified and directly answerable. Interactive clarification challenges this assumption by posing follow-up questions to resolve vagueness~\cite{guo2021abgcoqa}, showing promise in task-oriented settings but remaining underexplored in academic advising, where precision is critical~\cite{10.1145/3626772.3657843}. Surveys on Asking Clarification Questions datasets highlight the lack of standardized resources for training systems to handle ambiguity~\cite{rahmani2023acqsurvey}. In parallel, multi-agent QA decomposes tasks into retrieval, reasoning, and planning roles~\cite{VISWANATHAN2022100057,elizabeth-etal-2025-exploring,10.1145/3715097}, but few integrate lightweight retrieval with clarification into deployable pipelines for informal, context-dependent queries. Work on unanswerable QA has focused mainly on extractive benchmarks like SQuAD~2.0~\cite{rajpurkar-etal-2018-know}, with limited evaluation in LLM-based RAG and rare integration of cross-source synthesis with explicit no-answer signaling. These gaps motivate URASys, which combines clarification, agent-based reasoning, and dual-agent retrieval to decide when a query is answerable, when it requires interactive clarification, or when it should be explicitly marked as unanswerable. They further underscore the need for Ambiguous QA datasets in both English and low-resource, nuance-rich languages such as Vietnamese, with a particular emphasis on educational QA contexts.
+
+
+
+
+
+
+
+
+
+% \subsection{Recent Advances in RAG}
+
+% Recent advances in RAG have focused on improving factual accuracy and reasoning capabilities, tập trung vào graph-based method. For example, NodeRAG~\cite{xu2025noderag} builds heterogeneous graphs with semantically distinct nodes to support structured evidence integration. HopRAG~\cite{liu2025hoprag} employs dual-stage retrieval for multi-hop QA, while HippoRAG~\cite{gutierrez2024hipporag} uses hierarchical memory inspired by cognitive neuroscience to enhance long-range context handling. Although these methods show strong performance, they depend on complex graph infrastructure and architector that is costly to construct and maintain. More critically, they assume well-formed queries and lack interactive clarification mechanisms. This limits their usefulness in educational settings, where questions are often ambiguous, informal, or context-dependent. In such cases, particularly in low-resource languages like Vietnamese, lightweight document-based retrieval combined with clarification support is a more practical and scalable approach. 
+
+% \subsection{QA Systems for Educational Settings}
+
+
+% Despite growing demand, relatively few practical and impactful QA systems for education have been formally documented in the research literature. In practice, many existing solutions rely on open-source LLMs combined with RAG~\cite{10.1145/3627508.3638293} to address diverse or underspecified user queries. Traditional systems, by contrast, depend on natural language understanding techniques such as intent classification and entity recognition to map queries to predefined responses~\cite{Aloqayli2023IntelligentCF}. Platforms like Rasa~\cite{Bocklisch2017RasaOS} offer modular tools for intent detection and dialogue management, and are widely adopted in FAQ-based deployments. However, rule-based systems often struggle with ambiguous or out-of-scope input~\cite{9648677,NGUYEN2021100036}. More recent approaches fine-tune LLMs with simplified RAG pipelines~\cite{llamachatbot}, improving flexibility but still facing two persistent challenges: hallucinated responses when retrieval fails, and the lack of mechanisms for clarification. These limitations are especially problematic in academic advising, where users expect accurate, trustworthy, and context-sensitive answers.
+
+% \subsection{Towards Multi-Agent Systems for Educational QA}
+
+% Đặc biệt khi LLMs ngay càng mạnh, thì AI Agents, nói đơn giản là LLM có khả năng tương tác với các tools bên ngoài, nổi lên như 1 trend trong domain QA. Các hệ thống gồm nhiều AI Agent phối hợp này kia cho hợp lý thực hiện các tác vụ khác nhau, và mở ra tiềm năng rong lĩnh vực . Việc phối hợp các agent và các tools theo workflow nhất định cũng là thách thức khi phải duy trì cost ổn định này kia. 
+
+
+\section{URASys Architecture}
+
+\subsection{System Overview}
+
+Figure~\ref{fig:agent} illustrates the overall architecture of URASys. When a user submits a query $q$, the \textit{Manager Agent} first analyzes its structure and semantics, then decomposes it into a set of sub-queries $\{q_1, q_2, \dots, q_n\}$. Each sub-query $q_i$ is assigned to a dedicated agent team $\mathcal{A}_i$, which comprises two specialized components: a \textit{FAQ Search Agent} and a \textit{Document Search Agent}. These teams operate concurrently, retrieving relevant evidence from both an augmented FAQ repository $\mathcal{F}$ and a structured document corpus $\mathcal{D}$, yielding evidence sets $E_i = \mathcal{A}_i(q_i, \mathcal{F}, \mathcal{D})$. Once retrieval is complete, the Manager Agent aggregates the results into a unified evidence pool $E = \bigcup_{i=1}^{n} E_i$, which serves as the basis for generating the final answer. If the evidence is insufficient or contradictory, the system proactively engages the user in a clarification round before finalizing the response, and in rare cases where both retrieval streams provide no supporting signals, URASys gracefully returns an explicit no-answer response. This architecture enables URASys to handle ambiguous, incomplete, or context-dependent queries with high precision and modularity, particularly in educational domains.
+
+
+
+
+\subsection{Modular Agent Design}
+\label{sec:design}
+URASys follows a modular multi-agent architecture inspired by how human advisors handle complex or underspecified queries. In real-world educational settings, effective advising typically involves two key behaviors: (i) seeking clarification when a user’s intent is unclear, and (ii) consulting multiple sources to ensure accurate and comprehensive responses. These practices motivate the separation of responsibilities in URASys, enabling each agent to specialize while maintaining coherent coordination through a central controller.
+
+\smallskip
+\noindent \textbf{Manager Agent} \quad
+The \textit{Manager Agent} is the system’s central reasoning component. It orchestrates the workflow by decomposing the user query into sub-queries, delegating them to retrieval agents, evaluating the evidence, and deciding whether the system is ready to respond confidently. Its decision-making follows the \textit{Just Enough} principle: an answer is generated only when the evidence is both sufficient and internally consistent. To implement this, the agent adopts two complementary prompting strategies: \textit{Tree-of-Thought}~\cite{yao2023tree}, which explores multiple reasoning paths in parallel, and \textit{Chain-of-Thought}~\cite{wei2022chain}, which enforces coherent, step-by-step logic. If the aggregated evidence is inconclusive or contradictory, the Manager Agent applies \textit{ask-before-answer}: it refrains from speculation and initiates clarification to refine the user query. If clarification fails or key information is missing, it explicitly reports that no answer can be provided. This iterative reasoning workflow is formalized in Algorithm~\ref{alg:manager-agent}.
+
+
+
+
+\begin{algorithm}[t]
+\caption{Manager Agent Reasoning}
+\label{alg:manager-agent}
+\KwIn{Query $q$, LLM $p_\theta$, FAQ corpus $\mathcal{F}$, document corpus $\mathcal{D}$, max attempts $T$}
+\KwOut{Answer $a$ or clarification $q_c$}
+
+$t \leftarrow 0$ \;
+\While{$t < T$}{
+  $S \leftarrow \texttt{Decompose}(q)$ \;
+  $E \leftarrow \emptyset$ \;
+  \ForEach{$q_i \in S$}{
+    $E \leftarrow E \cup \texttt{FAQSearch}(q_i, \mathcal{F}) \cup \texttt{DocSearch}(q_i, \mathcal{D})$ \;
+  }
+
+  \uIf{\texttt{IsSpecific}$(q)$ \textbf{and} \texttt{HasDirectAnswer}$(E)$}{
+    $a \leftarrow \texttt{GenerateAnswer}(p_\theta, E)$ \;
+    \textbf{return} $a$ \;
+  }
+  \uElseIf{\texttt{IsBroad}$(q)$ \textbf{and} \texttt{RevealCategories}$(E)$}{
+    $q_c \leftarrow \texttt{ExtractCategories}(E)$ \;
+    \textbf{return} \texttt{AskClarification}$(q_c)$ \;
+  }
+  \uElseIf{\texttt{IsVague}$(q)$ \textbf{or} \texttt{Insufficient}$(E)$}{
+    \If{$t + 1 < T$}{
+      $q \leftarrow \texttt{Refine}(q, E)$ \;
+    }
+    \Else{
+      \textbf{return} \texttt{NoInformationFound}() \;
+    }
+  }
+
+  $t \leftarrow t + 1$ \;
+}
+\end{algorithm}
+
+
+\smallskip
+\noindent \textbf{Retrieval Sub-Agents} \quad
+To retrieve information from distinct sources, the system instantiates two specialized LLM-based retrieval agents: one for FAQs and one for official documents. Each sub-query $q_i$ is processed \textbf{concurrently} by a dedicated agent pair $A_i$, which is instantiated dynamically and invoked through a unified tool interface, implemented as a function named \texttt{search\_information} and called by the Manager Agent.
+
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{latex/figures/URASys_2.pdf}
+    \caption{Two-phase indexing pipeline in URASys. Phase 1 (Chunk-and-Title) processes raw documents into coherent text blocks composed of a concise title and a rewritten chunk, enabling effective hybrid document retrieval. Phase 2 (Ask-and-Augment) generates and paraphrases question-answer pairs from each document block, forming a high-coverage and query-resilient FAQ corpus.}
+    \label{fig:index}
+\end{figure*}
+
+\begin{itemize}
+    \item The \textit{FAQ Search Agent} is optimized for high-precision lookup over a curated FAQ repository $\mathcal{F}$. It performs lightweight iterative search, with at most a few reformulation attempts based on result adequacy.
+
+    \item The \textit{Document Search Agent} performs semantic retrieval over a structured corpus of academic and administrative documents $\mathcal{D}$. This agent follows a more elaborate prompting loop, allowing multiple reformulations when necessary. At each step, it analyzes the query, refines the search expression, and evaluates results to decide whether to continue or stop.
+\end{itemize}
+Both agents are strictly grounded: their final responses must be based solely on content returned by their respective retrieval tools, with no speculative or hallucinated generation. Each agent communicates with its backend service using the \textit{Model Context Protocol} (MCP) over \textit{Server-Sent Events} (SSE), allowing low-latency streaming of search results. This behavior implements a constrained form of CoT reasoning applied externally via tool outputs rather than internal deliberation alone.
+
+
+
+\subsection{Hybrid Retrieval Technique}
+
+Each retrieval sub-agent in URASys employs a hybrid search strategy that combines lexical and semantic signals via BM25 and dense vector retrieval~\cite{10.1145/3637528.3671470}. Rather than aggregating scores via a weighted linear combination (e.g., $\alpha \cdot \text{Dense} + (1 - \alpha) \cdot \text{BM25}$), which requires manual tuning of $\alpha$, we adopt \textit{Reciprocal Rank Fusion} (RRF)~\cite{10.1145/1571941.1572114}, a simple yet effective rank-based method that merges results without assuming score normalization or compatibility. Given two ranked lists $\mathcal{L}_1$ and $\mathcal{L}_2$ from BM25 and dense retrieval respectively, the fused score for a document $d$ is computed as shown in Equation~\ref{eq:rrf}.
+\begin{equation}
+s(d) = \sum_{i=1}^{2} \frac{1}{k + \text{rank}_{\mathcal{L}_i}(d)}
+\label{eq:rrf}
+\end{equation}
+Here, $\text{rank}_{\mathcal{L}_i}(d)$ denotes the position of $d$ in list $\mathcal{L}_i$, and $k$ is a smoothing constant. This formulation ensures that documents ranked highly in either modality receive strong fused scores, enhancing both robustness and interpretability. 
+
+\subsection{Proposed Indexing Strategy}
+\label{sec:indexing-strategy}
+
+To support high-quality retrieval for the two specialized agents in URASys, namely the Document Search Agent and the FAQ Search Agent, we design a two-phase indexing pipeline as illustrated in Figure~\ref{fig:index}. Each phase constructs a distinct type of retrieval unit tailored to the specific needs of its corresponding agent. This pipeline is tightly coupled with a suite of LLM-based modules, including the \textit{Chunk Rewriter}, \textit{Title Assigner}, \textit{FAQ Creator}, and \textit{FAQ Expander}, all implemented through prompt-based techniques \cite{Kamath2024}. These components enable flexible adaptation to new domains and play a central role in generating semantically rich and query-resilient retrieval units.
+
+\smallskip
+\noindent
+\textbf{Phase 1: Chunk-and-Title}\quad Given a raw document $d$, we apply a semantic chunking module to segment it into a set of discourse-aligned fragments $\texttt{SemanticChunker}(d) \rightarrow \{d_1, d_2, \dots, d_n\}$, where each $d_i$ is a semantically coherent span. Because these initial fragments may include mid-sentence boundaries or depend on broader context, each $d_i$ is rewritten with document-level context using a context-aware module $\texttt{ChunkRewriter}(d_i, d) \rightarrow c_i$ to produce a self-contained and fluent chunk. Each rewritten chunk $c_i$ is then passed through a title assignment function $\texttt{TitleAssigner}(c_i) \rightarrow t_i$, which generates a concise and descriptive title summarizing the core content. Finally, the title and chunk are concatenated into a single final chunk $x_i = \texttt{Concat}(t_i, c_i)$, forming an augmented document corpus
+
+\smallskip
+\centerline{ 
+$ \displaystyle \mathcal{D} = \{x_1, x_2, \dots, x_n\}$}
+\smallskip
+
+\noindent where each $x_i$ is a unified retrieval unit that combines a semantic anchor with its associated content. This corpus serves as the retrieval basis for the Document Search Agent, which performs hybrid retrieval over each $x_i$ using both lexical and semantic signals. The inclusion of titles enhances retrieval effectiveness by injecting salient keywords that benefit sparse retrieval, while preserving the semantic richness of the underlying chunk.
+
+\smallskip
+\noindent
+\textbf{Phase 2: Ask-and-Augment}\quad Each final chunk $x_i \in \mathcal{D}$, which contains both the generated title and rewritten chunk, is passed to a FAQ generation module $\texttt{FAQCreator}(x_i)$ to synthesize $m$ canonical FAQ pairs $\{(q_{i,1}, a_{i,1}), \dots, (q_{i,m}, a_{i,m})\}$. These questions are designed to reflect plausible user intents, guided by the semantic scope introduced by the title and grounded in the content of the chunk. To improve robustness against surface variation in user phrasing, each question $q_{i,j}$ is paraphrased into $k$ diverse variants via $\texttt{FAQExpander}(q_{i,j}) \rightarrow \{q_{i,j}^{(1)}, \dots, q_{i,j}^{(k)}\}$, all sharing the same answer $a_{i,j}$. The result is a richly paraphrased FAQ corpus
+
+\smallskip
+\centerline{$\displaystyle 
+\mathcal{F} = \{(q_{i,j}^{(l)}, a_{i,j}) \mid i \in [1,n],\ j \in [1,m],\ l \in [1,k]\}$}
+
+\smallskip
+
+\noindent which serves as the retrieval basis for the FAQ Search Agent. The inclusion of multiple paraphrases for each intent improves coverage and increases robustness to syntactic and stylistic variation, which is especially important for Vietnamese, where the same meaning can be expressed in many different ways.
+
+\section{Experimentations}
+\label{sec:experiments}
+
+We conduct two experiments to evaluate URASys in terms of retrieval performance and real-world usability. The first benchmarks our system against a range of \textit{state-of-the-art} (SOTA) and classical RAG baselines across multiple public QA datasets, covering diverse reasoning types and domain settings. The second is a user study with real end-users to assess practical effectiveness and user trust under different interaction scenarios.
+
+\subsection{Datasets}
+\label{sec:datasets}
+
+We evaluate URASys on five datasets spanning three QA settings: single-hop, multi-hop, and domain-specific queries. For each public dataset, we sample 1{,}000 representative questions. Several include \textbf{unanswerable cases}, making them well-suited for testing the system’s ability to handle uncertainty and trigger clarification.
+
+\smallskip
+\noindent
+\textbf{Single-hop QA}\quad  
+SQuAD 2.0~\cite{rajpurkar-etal-2018-know} has English questions from Wikipedia, including adversarially unanswerable. UIT-ViQuAD 2.0~\cite{van2022vlsp} is its Vietnamese counterpart with similar design.
+
+
+\smallskip
+\noindent
+\textbf{Multi-hop QA}\quad  
+HotpotQA~\cite{yang-etal-2018-hotpotqa} and VIMQA~\cite{le-etal-2022-vimqa} require reasoning over multiple documents. VIMQA adapts this to Vietnamese, making it suitable for low-resource multi-hop evaluation.
+
+\smallskip
+\noindent
+\textbf{Domain-specific QA}\quad  
+UniQA is a custom dataset of real-world Vietnamese student queries on university admissions. Each question links to official academic documents, reflecting URASys’s target deployment scenario.
+
+\smallskip
+\noindent
+We also build \textbf{ambiguous subsets} from SQuAD 2.0, UIT-ViQuAD 2.0, and UniQA. These include underspecified questions requiring clarification, paired with ground-truth paraphrases of clarified queries, providing a dedicated benchmark for interactive clarification in both English and Vietnamese.
+
+
+
+
+
+
+
+% \begin{table*}[t]
+% \centering
+% \caption{Answer correctness ($\uparrow$) across five QA benchmarks. Best scores are in \textbf{bold}, second-best are \underline{underlined}.}
+% \begin{tabular}{l|cc|cc|c}
+% \toprule
+% \textbf{Method} & \textbf{SQuAD 2.0} & \textbf{UIT-ViQuAD 2.0} & \textbf{HotpotQA} & \textbf{VIMQA} & \textbf{UniQA} \\
+% \midrule
+% Naive RAG (Dense)     & \underline{0.74} & 0.10 & \underline{0.84} & 0.82 & 0.57 \\
+% Naive RAG (BM25)      & 0.67 & 0.20 & 0.83 & 0.84 & 0.56 \\
+% Naive RAG (Hybrid)    & 0.68 & 0.12 & 0.81 & \textbf{0.86} & 0.58 \\
+% \cmidrule(lr){1-6}
+% NodeRAG       & 0.33 & 0.38 & 0.83 & \underline{0.85} & \underline{0.75} \\
+% HippoRAG 2    & 0.42 & 0.28 & 0.82 & 0.68 & 0.51 \\
+% MiniRAG       & \textbf{0.75} & \underline{0.57} & 0.59 & 0.76 & 0.27 \\
+% \midrule
+% \textbf{URASys (Ours)}       & \textbf{0.75} & \textbf{0.80} & \textbf{0.90} & 0.83 & \textbf{0.85} \\
+% \bottomrule
+% \end{tabular}
+% \label{tab:result_1}
+% \end{table*}
+
+
+
+\begin{table*}[t]
+\centering
+\caption{
+Answer correctness percentages ($\uparrow$) across five QA benchmarks. For datasets with unanswerable and ambiguous questions (SQuAD 2.0, UIT-ViQuAD 2.0, UniQA), results are split into Overall, Unanswerable (Unans.), and Ambiguous (Ambig.) subsets. Best scores are in \textbf{bold}; second-best are \underline{underlined}.
+}
+\label{tab:result_combined}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l|ccc|ccc|cc|ccc}
+\toprule
+\multirow{2}{*}{\textbf{Method}}
+& \multicolumn{3}{c|}{\textbf{SQuAD 2.0}} 
+& \multicolumn{3}{c|}{\textbf{UIT-ViQuAD 2.0}} 
+& \multirow{2}{*}{\textbf{HotpotQA}}
+& \multirow{2}{*}{\textbf{VIMQA}}
+& \multicolumn{3}{c}{\textbf{UniQA}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){10-12}
+& Overall & Unans. & Ambig.
+& Overall & Unans. & Ambig.
+& 
+& 
+& Overall & Unans. & Ambig. \\
+\midrule
+Naive RAG (Dense)     
+& 30.3 & 7.2  & 14.8
+& 18.2 & 2.9  & 11.6
+& 11.3 & 41.2
+& 40.1 & 9.2  & 13.8 \\
+Naive RAG (BM25)      
+& 30.1 & 13.6 & 12.9
+& 18.7 & 3.4  & 31.3
+& 11.8 & 40.0
+& 39.8 & 9.3  & 8.6  \\
+Naive RAG (Hybrid)    
+& 30.3 & 8.3  & 10.6
+& 18.3 & 3.7  & 21.3
+& 11.6 & 42.4
+& 41.3 & 9.03 & 3.2  \\
+\midrule
+IRCoT       
+& 45.3 & 33.4 & 13.7
+& 46.9 & 28.0 & 31.7
+& 43.2 & 20.7
+& 56.7 & 9.4  & 67.5 \\
+LightRAG       
+& 43.4 & 36.2 & 18.2
+& 44.3 & 49.0 & 45.6
+& 59.0 & \underline{76.0}
+& 51.8 & \underline{51.0} & \underline{68.2} \\
+MiniRAG       
+& 49.0 & 10.6 & 17.5
+& 55.0 & 11.3 & \underline{70.5}
+& 21.7 & 54.5
+& 52.6 & 49.0  & 36.9 \\
+NodeRAG       
+& 44.1 & 23.0 & \underline{69.3}
+& 48.1 & 8.1  & 68.3
+& 56.7 & 45.3
+& \underline{67.7} & 14.0  & 32.5 \\
+HippoRAG 2    
+& \underline{67.3} & \underline{56.2} & 67.4
+& \underline{78.8} & \underline{54.0} & 62.7
+& \underline{60.3} & 75.0
+& 50.7 & 13.0  & 49.7 \\
+\midrule
+\textbf{URASys (Ours)}       
+& \textbf{75.0} & \textbf{83.7} & \textbf{71.9}
+& \textbf{80.0} & \textbf{86.5} & \textbf{73.9}
+& \textbf{90.0} & \textbf{83.2}
+& \textbf{85.0} & \textbf{82.6} & \textbf{81.2} \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+
+
+\subsection{Evaluation Metrics}
+\label{sec:metrics}
+
+
+
+Standard metrics like \textit{Exact Match} (EM) and token-level F1 often overlook reasoning quality, especially in multi-hop or underspecified scenarios~\cite{schuff-etal-2020-f1}. We instead use the \textit{LLM-as-a-Judge} protocol~\cite{gu2024survey}, where an external model scores answer correctness and explanation quality. For unanswerable subsets, models must indicate insufficient information, while for ambiguous ones they should request necessary clarifications. We also conduct a \textit{human evaluation}, with participants rating outputs on seven dimensions (e.g., factuality, trust) using a 5-point \textit{Likert scale}~\cite{82e6db25-3f58-3cc9-99b4-104abc75f49e}, complementing automatic metrics with user-centered feedback.
+
+
+\subsection{Baselines}
+\label{sec:baselines}
+
+We evaluate URASys by comparing it against the following baselines.
+
+\smallskip \noindent
+\textbf{Naive RAG}\quad A basic RAG pipeline using BM25, dense retrieval, and hybrid retrieval with score interpolation~\cite{10.1145/3637528.3671470}.
+
+\smallskip \noindent
+\textbf{IRCoT + SOTA LLM}\quad Multi-step QA approach interleaving retrieval and CoT reasoning using a SOTA LLM~\cite{trivedi-etal-2023-interleaving}.
+
+\smallskip \noindent
+\textbf{LightRAG}\quad Incorporates graph structures into text indexing and retrieval~\cite{guo2024lightrag}.
+
+\smallskip \noindent
+\textbf{MiniRAG}\quad Lightweight system with small LLM and heterogeneous graph index for efficient structured retrieval~\cite{fan2025minirag}.
+
+\smallskip \noindent
+\textbf{NodeRAG}\quad Graph-based framework integrating structured evidence for improved multi-hop retrieval~\cite{xu2025noderag}.
+
+\smallskip \noindent
+\textbf{HippoRAG 2}\quad Retrieval system inspired by hippocampal theory for better long-term knowledge integration~\cite{gutierrez2025rag}.
+
+\subsection{Implementation Details}
+\label{sec:implementation}
+
+To ensure reproducibility and fair comparison, all systems share the same model backbone and evaluation protocol. We adopt \texttt{gemini-2.0-flash}\footnote{\url{https://ai.google.dev/gemini-api/docs/models/\#gemini-2.0-flash}} as the unified LLM backbone, selected for its strong balance between reasoning accuracy and computational efficiency. Text embeddings are derived from OpenAI’s \texttt{text-embedding-3-large}\footnote{\url{https://platform.openai.com/docs/models/text-embedding-3-large}}, a multilingual representation model supporting both English and Vietnamese data. All retrieval and generation baselines are run with default hyperparameters to reflect realistic out-of-the-box behavior rather than tuned performance. LLM-as-a-Judge evaluations are performed with the GPT-4o API\footnote{\url{https://platform.openai.com/docs/models/gpt-4o}} under a standardized rubric to maintain consistency across systems. For our ambiguous subsets, prompt templates are designed to allow the model to proactively request clarification when query context is insufficient, ensuring that clarification behaviors are assessed uniformly across datasets and languages. 
+
+
+
+
+% \subsection{Results and Analysis}
+
+% Table~\ref{tab:result_1} presents answer correctness scores on five QA benchmarks using the LLM-as-a-Judge evaluation protocol. URASys achieves the highest score on four out of five datasets, demonstrating robust generalization across languages, domains, and reasoning types.
+
+% \smallskip
+% \noindent
+% \textbf{Single-hop QA}\quad
+% URASys performs strongly on both closed-domain benchmarks. On SQuAD~2.0, it ties with MiniRAG at 0.75, despite MiniRAG being tailored for such settings with a graph-based index. HippoRAG~2 trails at 0.42, yielding a 78\% relative gain. On UIT-ViQuAD~2.0, URASys attains 0.80, outperforming MiniRAG by 0.23 points (a 40\% improvement) and far exceeding Dense RAG, which drops sharply from 0.74 (SQuAD) to 0.10. These results highlight two key findings: (i) Vietnamese retrieval poses greater challenges due to morphological and syntactic complexity, and (ii) URASys’s clarification-first, dual-source retrieval mechanism provides clear benefits in such low-resource linguistic settings.
+
+% \smallskip
+% \noindent
+% \textbf{Multi-hop QA}\quad
+% On HotpotQA, URASys scores 0.90, outperforming Dense RAG (0.84), NodeRAG (0.83), and MiniRAG (0.59). This suggests that agent-driven query decomposition yields better evidence synthesis than static retrieval. On VIMQA, URASys reaches 0.83, slightly behind Hybrid RAG (0.86). The narrow margin indicates that for well-formed multi-hop queries, retrieval quality plays a dominant role, while clarification contributes less. Nevertheless, URASys remains competitive across both open-ended and structured question formats.
+
+% \smallskip
+% \noindent
+% \textbf{Educational QA}\quad
+% On UniQA, a domain-specific benchmark reflecting real student and advisor interactions, URASys achieves 0.85. This score is 10 points above NodeRAG and more than 27 points higher than any Naive RAG baseline. These improvements stem from its ability to interpret vague, fragmented queries and retrieve semantically relevant content through advisor-aligned workflows.
+
+% \smallskip
+% \noindent
+% \textbf{Stability and Generalization}\quad
+% URASys consistently scores above 0.80 across all benchmarks except VIMQA, showing minimal performance drop across settings. In contrast, baselines exhibit sharp variance. MiniRAG drops from 0.75 (SQuAD) to 0.27 (UniQA), while Dense RAG falls from 0.84 (HotpotQA) to 0.10 (ViQuAD). NodeRAG and HippoRAG perform well on multi-hop but degrade significantly on single-hop queries. URASys’s modular agent architecture and clarification-aware retrieval enable robust performance regardless of query type, language, or domain.
+
+% \smallskip
+% \noindent
+% \textbf{Handling Ambiguous Queries}\quad
+% URASys demonstrates strong performance on unanswerable questions, which are prevalent in educational settings, especially in Vietnamese where queries are often informal and underspecified. As shown in Table~\ref{tab:result_1}, it achieves 0.89, 0.80, and 0.84 on the unanswerable subsets of SQuAD~2.0, UIT-ViQuAD~2.0, and UniQA, clearly ahead of all baselines. MiniRAG ranks second in most cases, likely due to its graph-based retrieval, but URASys’s clarification-first strategy yields more consistent gains across datasets, underscoring the value of interaction-aware QA design.
+
+
+
+\begin{table*}[t]
+\centering
+\caption{
+Human evaluation scores from end-user deployment. \textit{Accuracy} is binary; \textit{Number of Thoughts} (NoT) counts reasoning steps per answer; other metrics are rated on a 5-point Likert scale ($\uparrow$).
+}
+\label{tab:result_2}
+\begin{tabular}{l|cccc}
+\toprule
+\textbf{Group} & \textbf{Accuracy} & \textbf{NoT} & \textbf{Explanation Quality} & \textbf{Trust} \\
+\midrule
+G1  & 0.80 & 1.95 & 4.51 & 4.26 \\
+G2  & 0.88 & 2.24 & 4.76 & 4.37 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+\begin{table*}[t]
+\centering
+\caption{
+Ablation study results across five QA datasets under the LLM-as-a-Judge protocol. 
+}
+\label{tab:ablation}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l|cc|cc|c}
+\toprule
+\textbf{System Variant} & \textbf{SQuAD~2.0} & \textbf{UIT-ViQuAD 2.0} & \textbf{HotpotQA} & \textbf{VIMQA} & \textbf{UniQA} \\
+\midrule
+\textbf{URASys} & \textbf{0.75} & \textbf{0.80} & \textbf{0.90} & \textbf{0.83} & \textbf{0.85} \\
+w/o FAQ Search Agent & 0.73 & 0.26 & 0.43 & 0.14 & 0.48 \\
+w/o Document Search Agent & 0.59 & 0.16 & 0.86 & 0.15 & 0.62 \\
+w/o Manager Decomposition & 0.72 & 0.22 & 0.87 & 0.21 & 0.63 \\
+w/o Proposed Indexing & 0.71 & 0.29 & 0.85 & 0.29 & 0.64 \\
+w/o Clarification & 0.64  & 0.37 & 0.76 & 0.44 & 0.50 \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}
+
+
+
+
+\subsection{Results and Analysis}
+
+Table~\ref{tab:result_combined} summarizes answer correctness across five QA benchmarks, partitioned into Overall, Unanswerable, and Ambiguous subsets. URASys consistently achieves the highest performance across all settings, with particularly large gains on unanswerable questions (83.7\% on SQuAD 2.0 and 86.5\% on UIT-ViQuAD 2.0) and ambiguous cases (up to 81.2\% on UniQA), outperforming the next-best system, HippoRAG~2, by notable margins. Although models such as NodeRAG and HippoRAG~2 perform competitively on English datasets, their accuracy declines markedly on Vietnamese ambiguous and unanswerable subsets, revealing persistent cross-lingual challenges. Lightweight models like MiniRAG show moderate competitiveness on certain Vietnamese subsets but fall short of URASys’s dual-reasoning and interactive clarification capabilities. In contrast, traditional RAG baselines relying on single-pass retrieval struggle with complex or underspecified queries, underscoring the advantages of URASys’s agent-based, dual-retrieval design. Overall, URASys demonstrates strong generalization across languages, domains, and question complexities, effectively bridging the gap between benchmark QA and real-world ambiguous scenarios in multilingual, low-resource contexts.
+
+
+Table~\ref{tab:result_2} presents findings from a human evaluation conducted with real users. URASys was deployed to two groups of prospective university applicants: \textit{10 first-year students} (G1) and \textit{10 high-school seniors} (G2), each providing 20 randomly sampled queries on university-related topics. Across both groups, the system maintained high correctness ($>$0.80) while requiring on average only two reasoning turns per query. Participants rated URASys favorably on both explanation quality and trustworthiness (average $>$4.2/5), highlighting its practical potential as an educational advising agent in authentic, open-ended settings.
+
+
+
+\subsection{Ablation Study}
+\label{sec:ablation}
+
+We perform an ablation study by removing individual components of URASys and measuring their impact on answer correctness across five QA benchmarks (Table~\ref{tab:ablation}). The complete system consistently attains the best results, confirming that its performance arises from the synergy among modules. On SQuAD~2.0, an English single-hop dataset, removing any component yields only minor changes ($<$5\%), indicating balanced contributions when queries are well specified. In contrast, accuracy drops sharply on ViQuAD~2.0, especially when the Document Search Agent or query decomposition module is removed, with over 60\% accuracy loss. Replacing the Chunk-and-Title index with a standard chunking baseline similarly degrades performance, emphasizing the importance of structured indexing for ambiguous Vietnamese inputs. For multi-hop datasets, removing the FAQ Search Agent causes a 52\% drop on HotpotQA and 69\% on VIMQA, showing that decomposing queries and retrieving relevant FAQs is essential for multi-step reasoning in low-resource settings. On UniQA, a real-world educational dataset, eliminating the FAQ agent results in the steepest decline (0.85→0.48), while other ablations reduce accuracy by 20–25\%. Overall, the results highlight the pivotal role of FAQ retrieval, structured indexing, and clarification in domains where user questions are often vague or fragmented, confirming that URASys's retrieval and interaction components are complementary and jointly necessary for robust performance.
+
+
+
+
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+We present URASys, a modular and interaction-aware QA system tailored for educational scenarios. Evaluated on five benchmarks, including multi-hop and real-world academic datasets, URASys consistently outperforms retrieval-based baselines in factual accuracy and user trust. Its effectiveness stems from integration of query decomposition, dual-agent retrieval, and structure-aware indexing, as shown by our ablation study. While designed for education, the system architecture generalizes well to domains where queries tend to be vague, underspecified, or context-dependent, such as technical support or legal consultation. In such cases, URASys can identify missing information and opt not to answer until clarification is obtained, preserving factual integrity. Future directions include improving intent alignment in open-ended queries, seamless updates to evolving knowledge sources, and gradually replacing commercial LLM APIs with in-house lightweight models.
+
+\section*{Acknowledgments}
+We thank Ho Chi Minh City University of Technology (HCMUT), VNU-HCM, for supporting this study. We also acknowledge Mr.~Le~Hoang~Anh~Tai and Ms.~Huynh~Tieu~Phung for their assistance in refining the URASys codebase. Our sincere appreciation goes to the students and high-school participants who contributed to the human evaluation for their time and thoughtful feedback. The URASys project was recognized by NVIDIA as a representative use case of Agentic AI in Vietnam and was subsequently featured by Dr.~Ettikan~Karuppiah, Director at NVIDIA -- Asia~Pacific~South~Region, during his talk at AI~Day~Ho~Chi~Minh~City~2025.
+
+
+
+
+
+
+
+\section*{Limitations}
+
+While URASys demonstrates strong performance and broad adaptability across QA scenarios, several practical limitations remain. First, the system relies on a prompting strategy that may require careful tuning and ongoing maintenance, particularly in dynamic or evolving domains. Second, although overall computation is lightweight and stable, the use of multiple LLM calls across agents can incur notable monetary cost when relying on commercial APIs. Third, while URASys is designed for responsiveness and clarification, latency may increase for complex queries that involve deep decomposition or iterative refinement. These trade-offs between transparency, flexibility, and cost highlight directions for future work, including more streamlined agent orchestration and the adoption of lightweight, self-hosted LLMs.
+
+\section*{Supplementary Materials Availability Statements}
+
+All datasets used in our experiments are publicly available or accessible under minimal conditions. Specifically, \href{https://huggingface.co/datasets/rajpurkar/squad_v2}{SQuAD~2.0}, \href{https://huggingface.co/datasets/taidng/UIT-ViQuAD2.0}{UIT-ViQuAD~2.0} (via the VLSP 2021 ViMRC Challenge), and \href{https://hotpotqa.github.io/}{HotpotQA} are freely accessible online. Access to \href{https://github.com/vimqa/vimqa/}{VIMQA} requires signing a user agreement and direct contact with the dataset maintainers. Code for baseline systems, including NodeRAG~\cite{xu2025noderag}, HippoRAG~2~\cite{gutierrez2025rag}, and MiniRAG~\cite{fan2025minirag}, was retrieved from their official repositories using the latest versions available as of July~1,~2025. The UniQA dataset, its accompanying academic document collection, and the complete URASys implementation are released at \url{https://github.com/ura-hcmut/URASys}, \textbf{including the ambiguous subsets} used in evaluation.
+
+
+
+
+
+
+
+
+
+
+
+\bibliography{custom}
+
+\appendix
+
+\section{Dataset Statistics}
+\label{sec:dataset-statistics}
+
+To better characterize the datasets used in our experiments, we report descriptive statistics on context documents and evaluation queries. Table~\ref{tab:context-length} presents word-level statistics, including the number of context documents, the maximum, minimum, and average context length, the number of evaluation queries, and the number of unanswerable queries where applicable. The datasets vary widely in both context structure and query types. UniQA, derived from real-world educational content, contains significantly longer passages, with an average length over 1{,}200 words and a maximum exceeding 5{,}000. URASys maintains strong performance under these conditions, suggesting that it handles long-form, high-complexity contexts effectively.
+
+
+
+\begin{table*}[t]
+\centering
+\caption{Word-level context statistics and evaluation query composition across QA datasets.}
+\label{tab:context-length}
+\begin{tabular}{l|cc|cc|c}
+\toprule
+\textbf{Metric} & \textbf{SQuAD 2.0} & \textbf{UIT-ViQuAD 2.0} & \textbf{HotpotQA} & \textbf{VIMQA} & \textbf{UniQA} \\
+\midrule
+Context document count       & 46     & 934     & 996    & 1000   & 42     \\ \midrule
+Maximum context length       & 259    & 613   & 2075   & 676    & 5153   \\
+Minimum context length       & 27     & 99    & 103    & 8      & 298    \\ 
+Mean context length          & 91.1   & 182.1 & 972.4  & 264.7  & 1266.2 \\ \midrule
+Evaluation query count   &  1417  &  1731     & 1000   & 1000   &   888   \\
+
+Unanswerable queries         & 492    & 200   & --     & --     & 38     \\
+Ambiguous queries         & 417   & 731   & --     & --     & 314     \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{URASys Configuration}
+URASys is instantiated with a lightweight and consistent configuration across all agents and indexing modules. 
+Table~\ref{tab:urasys-config} summarizes the key parameters used throughout the system, covering both the URASys agent layer 
+and the two-phase indexing pipeline employed in all experiments.
+
+\begin{table*}[!ht]
+\centering
+\caption{URASys configuration and agent-level hyperparameters.}
+\label{tab:urasys-config}
+\begin{tabular}{l|l|l}
+\toprule
+\textbf{Component} & \textbf{Hyperparameter} & \textbf{Value} \\
+\midrule
+\multicolumn{3}{l}{\textbf{URASys (LLM backend: \texttt{gemini-2.0-flash})}} \\
+\midrule
+
+\multirow{2}{*}{Embedding Backend}
+ & Model & \texttt{text-embedding-3-large} \\
+ & Dimension & 3072 \\
+\midrule
+
+\multirow{3}{*}{Manager Agent}
+ & Temperature / Top-$p$ & 0.2 / 0.1 \\
+ & Max retries & 3 \\
+ & Thinking budget / Thoughts & 100 / enabled \\
+\midrule
+
+\multirow{4}{*}{Document Search Agent}
+ & Temperature / Top-$p$ & 0.1 / 0.1 \\
+ & Max tool calls & 3 \\
+ & Retrieval top-$k$ & 3--5 (adaptive) \\
+& Thoughts in planner & disabled \\
+\midrule
+
+\multirow{3}{*}{FAQ Search Agent}
+ & Temperature / Top-$p$ & 0.1 / 0.1 \\
+ & Max tool calls & 3 \\
+ & Retrieval top-$k$ & 3--5 (adaptive) \\
+ & Thoughts in planner & disabled \\
+\midrule
+
+\multicolumn{3}{l}{\textbf{Indexing Phase (LLM backend: \texttt{gemini-2.5-flash})}} \\
+\midrule
+
+\multirow{2}{*}{LLM Configuration}
+ & Temperature / Top-$p$ & 0.1 / 0.95 \\
+ & Max generation tokens & 8192 \\
+\midrule
+
+\multirow{2}{*}{Embedding Backend}
+ & Model & \texttt{text-embedding-3-small} \\
+ & Dimension & 1536 \\
+\midrule
+
+\multirow{3}{*}{Semantic Chunker}
+ & Breakpoint percentile & 95 \\
+ & Buffer size & 1 \\
+ & Min/Max chunk size & 10 / 1000 tokens \\
+\midrule
+
+\multirow{1}{*}{FAQ Creator}
+ & Max FAQ pairs per chunk & 5 \\
+\midrule
+
+\multirow{1}{*}{FAQ Expander}
+ & Max paraphrases per FAQ & 3 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{LLM-as-a-Judge Protocol}
+
+We adopt a deterministic LLM-as-a-Judge protocol to ensure consistent and unbiased evaluation across systems. Two prompts are used: one for standard QA and unanswerable cases (Figure~\ref{fig:prompt-standard}), and one for ambiguous questions that require clarification (Figure~\ref{fig:prompt-ambiguous}). All judgments are produced using GPT-4o with \texttt{temperature = 0.0} and \texttt{maxTokens = 32} to guarantee deterministic behavior. The judge model is fully blinded to the identity of the system that generated each prediction.
+
+
+\begin{figure*}[!ht]
+\centering
+\begin{promptblock}
+SYSTEM_PROMPT = """  
+### Role  
+You are an expert language model evaluator. Your task is to evaluate the model prediction given a ground truth.
+### Instruction  
+- If the prediction is "no answer" -> False  
+- If the prediction contains the ground truth verbatim -> True  
+- If the prediction paraphrases the ground truth -> True  
+- If the prediction contradicts the ground truth -> False  
+- Evaluation is language-agnostic: ignore whether the prediction is in English or Vietnamese.
+### Note  
+- The prediction may contain extra explanatory text: ignore it.  
+"""
+\end{promptblock}
+\vspace*{-0.2cm}
+\caption{Prompt used for standard QA and unanswerable evaluation.}
+\label{fig:prompt-standard}
+\end{figure*}
+
+\begin{figure*}[!ht]
+\centering
+\begin{promptblock}
+SYSTEM_PROMPT = """  
+You are an evaluator for an ambiguous question answering system.
+Evaluation Rules:  
+1. You are given: the question, a list of required info items, the correct answer, and the model's prediction.  
+2. If the prediction is a clarification question:  
+    - CORRECT if it explicitly asks for at least one required info item.  
+    - INCORRECT if it does not ask for any required info items.  
+3. If the prediction is a direct answer:  
+    - CORRECT if it matches or clearly paraphrases the correct answer.  
+    - INCORRECT otherwise.  
+4. If the prediction refuses to answer, says "I don't know", or indicates insufficient information:  
+    - Always INCORRECT.  
+5. Ignore the language used; evaluate purely based on content.  
+6. Output exactly one word: CORRECT or INCORRECT.  
+"""
+\end{promptblock}
+\vspace*{-0.2cm}
+\caption{Prompt used for ambiguous QA and clarification evaluation.}
+\label{fig:prompt-ambiguous}
+\end{figure*}
+
+
+\section{Multi-hop Performance Breakdown}
+
+To examine model behavior under varying reasoning demands, we perform a stratified analysis on HotpotQA and VIMQA by grouping questions by hop depth. Table~\ref{tab:multihop-breakdown} reports accuracy across 2-hop, 3-hop, 4-hop, and 5+ hop categories.
+
+URASys consistently achieves the highest performance across all reasoning depths. It attains 0.87 and 0.92 on HotpotQA 2-hop and 3-hop questions, surpassing the next-best system (LightRAG at 0.81 and 0.73). This trend aligns with Table~\ref{tab:result_2}, where URASys produces roughly two reasoning steps per answer, indicating effective decomposition and stable evidence aggregation. Traditional RAG pipelines degrade sharply as hop depth increases: Dense and BM25 retrieval perform adequately on 2-hop questions but collapse at deeper levels (e.g., Dense RAG: 0.19 $\to$ 0.02 from 2-hop to 4-hop), reflecting difficulty in combining dispersed evidence. A similar pattern appears on VIMQA, where accuracy falls to less than 0.03 at 4-hop and 5+ hop. Graph-based systems (NodeRAG, HippoRAG) show stronger multi-hop behavior; for example, NodeRAG reaches 0.66 on HotpotQA 2-hop and HippoRAG achieves 0.87 on 4-hop, although their performance varies substantially across datasets and hop levels.
+
+URASys maintains robustness across higher depths by combining specialized retrieval (FAQ and document agents) with adaptive reasoning and an ask-before-answer policy that prevents speculation under insufficient evidence. Its two-phase indexing pipeline broadens access to latent supporting cues, enabling more reliable retrieval even when reasoning chains span multiple documents. Although multi-hop QA is not the primary target of URASys, these results show that its architecture generalizes effectively and remains competitive under challenging multi-hop conditions.
+
+
+
+
+
+% \begin{table*}[t]
+% \centering
+% \caption{
+% Answer accuracy breakdown on HotpotQA and VIMQA across reasoning depths (2-hop, 3-hop, 4-hop, 5+ hops). Best scores are in \textbf{bold}; second-best are \underline{underlined}.
+% }
+% \label{tab:multihop-breakdown}
+% \begin{tabular}{l|cccc|cccc}
+% \toprule
+% \multirow{2}{*}{\textbf{Method}} & \multicolumn{4}{c|}{\textbf{HotpotQA}} & \multicolumn{4}{c}{\textbf{VIMQA}} \\
+% \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+% & 2-hop & 3-hop & 4-hop & 5+ hop & 2-hop & 3-hop & 4-hop & 5+ hop \\
+% \midrule
+% \textbf{Sample count} & 550 & 300 & 121 & 29 & 500 & 300 & 150 & 50 \\
+% \midrule
+% NodeRAG      & 0.66 & 0.54 & 0.41 & 0.00 & 0.76 & 0.21 & 0.07 & 0.00 \\
+% HippoRAG     & \underline{0.75} & \underline{0.52} & 0.27 & 0.03 & 0.73 & 0.27 & 0.03 & 0.02 \\
+% Dense RAG    & 0.19 & 0.01 & 0.02 & 0.00 & 0.71 & 0.17 & 0.03 & 0.02 \\
+% BM25 RAG     & 0.19 & 0.02 & 0.04 & 0.03 & 0.58 & 0.33 & \underline{0.47} & 0.00 \\
+% Hybrid RAG   & 0.20 & 0.01 & 0.02 & 0.03 & 0.63 & \underline{0.30} & 0.13 & 0.02 \\
+% IRCoT        & --   & --   & --   & --   & --   & --   & --   & --   \\
+% MiniRAG      & 0.36 & 0.05 & 0.03 & 0.00 & 0.76 & 0.46 & 0.18 & 0.02 \\
+% LightRAG     & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+% \textbf{URASys (Ours)} & \textbf{0.87} & \textbf{0.92} & \textbf{0.98} & \textbf{0.83} & \textbf{0.91} & \textbf{0.91} & \textbf{0.60} & \textbf{0.20} \\
+% \bottomrule
+% \end{tabular}
+% \end{table*}
+
+% \begin{table*}[t]
+% \centering
+% \caption{
+% Answer accuracy breakdown on HotpotQA and VIMQA across reasoning depths (2-hop, 3-hop, 4-hop, 5+ hops). Best scores are in \textbf{bold}; second-best are \underline{underlined}.
+% }
+% \label{tab:multihop-breakdown}
+% \begin{tabular}{l|cccc|cccc}
+% \toprule
+% \multirow{2}{*}{\textbf{Method}} & \multicolumn{4}{c|}{\textbf{HotpotQA}} & \multicolumn{4}{c}{\textbf{VIMQA}} \\
+% \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+% & 2-hop & 3-hop & 4-hop & 5+ hop & 2-hop & 3-hop & 4-hop & 5+ hop \\
+% \midrule
+% Dense RAG    & 0.19 & 0.01 & 0.02 & 0.00 & 0.71 & 0.17 & 0.03 & 0.02 \\
+% BM25 RAG     & 0.19 & 0.02 & 0.04 & 0.03 & 0.58 & 0.33 & \underline{0.47} & 0.00 \\
+% Hybrid RAG   & 0.20 & 0.01 & 0.02 & 0.03 & 0.63 & \underline{0.30} & 0.13 & 0.00 \\
+% \midrule
+% IRCoT        & 0.34 & 0.06 & 0.02 & 0.00 & 0.37 & 0.07 & 0.03 & 0.00 \\
+% LightRAG     & 0.81 & 0.73 & 0.71 & \underline{0.41} & 0.83 & 0.86 & 0.53 & \underline{0.16} \\
+% MiniRAG      & 0.36 & 0.05 & 0.03 & 0.00 & 0.76 & 0.46 & 0.18 & 0.02 \\
+% NodeRAG      & 0.66 & 0.54 & 0.41 & 0.00 & \underline{0.76} & 0.21 & 0.07 & 0.02 \\
+% HippoRAG     & \underline{0.75} & 0.52 & 0.27 & 0.03 & 0.73 & 0.27 & 0.03 & 0.00 \\
+% \textbf{URASys (Ours)} & \textbf{0.87} & \textbf{0.92} & \textbf{0.98} & \textbf{0.83} & \textbf{0.91} & \textbf{0.91} & \textbf{0.60} & \textbf{0.24} \\
+% \bottomrule
+% \end{tabular}
+% \end{table*}
+
+% \begin{table*}[t]
+% \centering
+% \caption{
+% Answer accuracy breakdown on HotpotQA and VIMQA across reasoning depths (2-hop, 3-hop, 4-hop, 5+ hops). 
+% Best scores are in \textbf{bold}; second-best are \underline{underlined}.
+% }
+% \label{tab:multihop-breakdown}
+% \begin{tabular}{l|cccc|cccc}
+% \toprule
+% \multirow{2}{*}{\textbf{Method}} & \multicolumn{4}{c|}{\textbf{HotpotQA}} & \multicolumn{4}{c}{\textbf{VIMQA}} \\
+% \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+% & 2-hop & 3-hop & 4-hop & 5+ hop & 2-hop & 3-hop & 4-hop & 5+ hop \\
+% \midrule
+% Naive RAG (Dense)    & 0.19 & 0.01 & 0.02 & 0.00 & 0.71 & 0.17 & 0.03 & 0.02 \\
+% Naive RAG (BM25)    & 0.19 & 0.02 & 0.04 & 0.03 & 0.58 & 0.33 & \underline{0.47} & 0.00 \\
+% Naive RAG (Hybrid)   & 0.20 & 0.01 & 0.02 & 0.03 & 0.63 & 0.30 & 0.13 & 0.00 \\
+% \midrule
+% IRCoT        & 0.34 & 0.06 & 0.02 & 0.00 & 0.37 & 0.07 & 0.03 & 0.00 \\
+% LightRAG     & \underline{0.81} & \underline{0.73} & \underline{0.71} & \underline{0.41} & \underline{0.83} & \underline{0.86} & \underline{0.53} & \underline{0.16} \\
+% MiniRAG      & 0.36 & 0.05 & 0.03 & 0.00 & 0.76 & 0.46 & 0.18 & 0.02 \\
+% NodeRAG      & 0.66 & 0.54 & 0.41 & 0.00 & 0.76 & 0.21 & 0.07 & 0.02 \\
+% HippoRAG     & 0.75 & 0.52 & 0.27 & 0.03 & 0.73 & 0.27 & 0.03 & 0.00 \\
+% \textbf{URASys (Ours)} & \textbf{0.87} & \textbf{0.92} & \textbf{0.98} & \textbf{0.83} & \textbf{0.91} & \textbf{0.91} & \textbf{0.60} & \textbf{0.24} \\
+% \bottomrule
+% \end{tabular}
+% \end{table*}
+
+\begin{table*}[t]
+\centering
+\caption{
+Answer accuracy breakdown on HotpotQA and VIMQA across reasoning depths.
+}
+\label{tab:multihop-breakdown}
+\begin{tabular}{l|cccc|cccc}
+\toprule
+\multirow{2}{*}{\textbf{Method}} & \multicolumn{4}{c|}{\textbf{HotpotQA}} & \multicolumn{4}{c}{\textbf{VIMQA}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9}
+& 2-hop & 3-hop & 4-hop & 5+ hop & 2-hop & 3-hop & 4-hop & 5+ hop \\
+\midrule
+\textbf{Sample count} & 550 & 300 & 121 & 29 & 500 & 300 & 150 & 50 \\
+\midrule
+ Naive RAG (Dense)    & 0.19 & 0.01 & 0.02 & 0.00 & 0.71 & 0.17 & 0.03 & 0.02 \\
+Naive RAG (BM25)    & 0.19 & 0.02 & 0.04 & 0.03 & 0.58 & 0.33 & 0.47 & 0.00 \\
+Naive RAG (Hybrid)   & 0.20 & 0.01 & 0.02 & 0.03 & 0.63 & 0.30 & 0.13 & 0.02 \\
+\midrule
+IRCoT        & 0.34 & 0.06 & 0.02 & 0.00 & 0.37 & 0.07 & 0.03 & 0.00 \\
+LightRAG     & \underline{0.81} & \underline{0.73} & 0.71 & \underline{0.41} & 0.73 & 0.86 & \underline{0.53} & 0.12 \\
+MiniRAG      & 0.36 & 0.05 & 0.03 & 0.00 & \underline{0.76} & 0.46 & 0.18 & 0.02 \\
+NodeRAG      & 0.66 & 0.54 & 0.41 & 0.00 & \underline{0.76} & 0.21 & 0.07 & 0.00 \\
+HippoRAG~2     & 0.75 & 0.52 & \underline{0.87} & 0.13 & 0.73 & \underline{0.87} & 0.23 & \underline{0.15} \\ \midrule
+\textbf{URASys (Ours)} & \textbf{0.87} & \textbf{0.92} & \textbf{0.90} & \textbf{0.43} & \textbf{0.91} & \textbf{0.91} & \textbf{0.60} & \textbf{0.16} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+
+
+\section{Details of Human Evaluation}
+
+\subsection{Procedure and Evaluation Criteria}
+
+To complement the LLM-as-a-Judge protocol, we conducted a human evaluation involving 20 target end-users, including \textit{10 university freshmen} (G1) and \textit{10 high school seniors} (G2). These participants were randomly recruited from admission-related events and information sessions hosted by our university. Each participant received a brief introduction to URASys and was invited to interact freely with the system by asking 20 questions of personal interest, as long as the topics fell within the scope of the system’s indexed data. Each system response was evaluated along nine dimensions, as follows.
+
+
+\begin{table*}[!ht]
+\centering
+\caption{Average human evaluation scores by user group on five additional dimensions.}
+\label{tab:human_group_results}
+\begin{tabular}{l|ccccc}
+\toprule
+\textbf{Group} & \textbf{UX} & \textbf{Factuality} & \textbf{Completeness} & \textbf{Fluency} & \textbf{Relevance} \\
+\midrule
+G1 & 4.61 & 4.34 & 3.45 & 4.96 & 4.03 \\
+G2   & 3.73 & 4.47 & 3.55 & 4.86 & 4.75 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+
+\begin{itemize}
+    \item \textbf{Number of Thoughts (NoT):} The number of intermediate reasoning steps generated before reaching a final answer. Higher values often indicate more structured or multi-step reasoning.
+    \item \textbf{Accuracy:} Whether the final answer is factually correct, assessed using a binary label indicating \textit{Correct} or \textit{Incorrect}.
+    \item \textbf{User Experience (UX):} Overall satisfaction with the system’s interface, clarity of output, and ease of interaction.
+    \item \textbf{Explanation Quality:} The clarity, coherence, and usefulness of the accompanying explanation, especially in helping users understand the rationale behind the answer.
+    \item \textbf{Factuality:} The extent to which the explanation contains accurate and verifiable information supported by retrieved evidence.
+    \item \textbf{Completeness:} Whether the system’s output fully addresses the user’s question without omitting important aspects.
+    \item \textbf{Fluency:} The grammatical correctness and naturalness of the language used.
+    \item \textbf{Relevance:} How directly the answer and explanation pertain to the original question, avoiding irrelevant or off-topic content.
+    \item \textbf{Trust:} The participant’s confidence in the system’s response, influenced by tone, coherence, and evidential grounding.
+\end{itemize}
+
+
+
+
+\subsection{Summary of Results} 
+
+In addition to Table~\ref{tab:result_2}, which reports scores on Accuracy, NoT, Explanation Quality, and Trust, we present the remaining human evaluation results in Table~\ref{tab:human_group_results}. These scores reflect average ratings from each user group on a 5-point Likert scale ($\uparrow$). 
+
+G1 reported higher satisfaction in terms of user experience (4.61) compared to G2 (3.73), likely because university freshmen are more accustomed to navigating institutional systems, whereas high school seniors may be more cautious due to the importance of the information for their university decisions or their familiarity with traditional advising. Both groups gave strong ratings for fluency and factuality, indicating that URASys responses were generally clear, coherent, and grounded in reliable evidence. However, completeness received lower scores (3.45 and 3.55), possibly because the system prompts for clarification when facing vague queries instead of guessing, which, while improving factual accuracy, can make the final answer feel unresolved. This trade-off may also affect perceived relevance, reflected in G1’s lower relevance score (4.03) compared to G2 (4.75). Still, trust and accuracy remain high across both groups, confirming that URASys meets its core objective of delivering reliable, well-supported answers in educational settings. 
+
+The results suggest that different user groups may prioritize different aspects of system behavior, such as interaction flow versus completeness, depending on their background and expectations.
+
+\begin{figure*}[!ht]
+\centering
+\begin{promptblock}
+{
+  "question": "Which campaign promoting female empowerment did she support?",
+  "info": ["Which artist is being referred to", "Whether the campaign is music-related or social"],
+  "answer": "Ban Bossy campaign",
+  "paragraph": "In an interview published by Vogue in April 2013, Beyonce was asked if she considers herself a feminist... She has also contributed to the Ban Bossy campaign..."
+}
+\end{promptblock}
+\vspace*{-0.2cm}
+
+\caption{Example item following the ambiguous-subset annotation schema.}
+\label{fig:ambiguous-json-schema}
+\end{figure*}
+
+
+\begin{table*}[t]
+\centering
+\caption{Average inference latency (in seconds per query) across datasets.}
+\label{tab:latency}
+\begin{tabular}{l|cc|cc|c}
+\toprule
+\textbf{Method} & \textbf{SQuAD 2.0} & \textbf{UIT-ViQuAD 2.0} & \textbf{HotpotQA} & \textbf{VIMQA} & \textbf{UniQA} \\
+\midrule
+Naive RAG (Dense)   & 5.87 & 11.98 & 10.76 & 13.87 & 14.78 \\
+Naive RAG (BM25)    & 4.57 & 8.65  & 9.34  & 11.34 & 13.14 \\
+Naive RAG (Hybrid)  & \textbf{7.34} & 13.24 & 12.37 & 15.78 & \textbf{18.98} \\
+\midrule
+LightRAG            & 4.96 & 6.54  & 5.29  & 8.65  & 9.64  \\
+MiniRAG             & 1.51 & 2.24  & 2.32  & 1.40  & 1.88  \\
+NodeRAG             & 3.12 & 2.61  & 4.03  & 2.09  & 4.94  \\
+HippoRAG 2          & 4.12 & 3.25  & 1.37  & 1.46  & 7.34  \\
+\midrule
+\textbf{URASys (Ours)} 
+                    & 3.67 & \textbf{31.24} & \textbf{24.46} & \textbf{26.23} & 15.45 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+
+\section{Construction of Ambiguous Subsets}
+
+
+To evaluate URASys on its ability to handle ambiguous queries, we construct dedicated ambiguous subsets that avoid leakage, systematic bias, and any overlap with the system's FAQ index. The full construction process is summarized below.
+
+\begin{itemize}
+    \item For each (question, answer, paragraph) sample in the original dataset, we assign one ambiguity type from the three categories listed below, with respective probabilities of 30\%, 40\%, and 30\%.
+    
+    \item We construct a structured LLM prompt that generates a hard ambiguous variant of the question according to the assigned type:
+    \begin{itemize}
+        \item \textbf{Missing context:} remove or modify a central subject, temporal reference, or condition.
+        \item \textbf{Multiple interpretations:} rewrite the question so that it supports two or more semantically plausible interpretations.
+        \item \textbf{Generalization:} transform the question into an overly broad, generic, or intentionally underspecified form.
+    \end{itemize}
+    The LLM must output a strictly valid JSON object following the schema in Figure~\ref{fig:ambiguous-json-schema}.
+    
+    \item We allow up to three generation attempts. A sample is accepted only if the JSON is syntactically valid and the masked question exhibits both semantic similarity and lexical overlap below 0.75 relative to the original question. This criterion ensures genuine novelty and prevents superficial edits. Samples that fail all attempts are discarded.
+    
+    \item To prevent contamination or implicit bias toward URASys, the construction of ambiguous subsets is fully isolated from the FAQ-index generation pipeline. No ambiguous samples or their metadata were incorporated into the creation of retrieval components.
+\end{itemize}
+
+\section{Latency Analysis}
+\label{sec:latency}
+
+Table~\ref{tab:latency} reports the average per-query processing time across all datasets. As expected, URASys is slower than lightweight or single-pass RAG baselines, but its latency remains within practical bounds for interactive counseling and advisory use cases. The results also reveal a broader pattern: methods that employ deeper reasoning or multi-step retrieval (e.g., LightRAG and HippoRAG) generally incur higher latency, whereas shallow retrievers respond faster but offer substantially lower accuracy. A notable exception is the Naive Hybrid RAG baseline, which shows the highest latency on several datasets despite lacking explicit reasoning; its two-stage retrieval and fusion process introduce considerable overhead without providing adaptive interaction.
+
+URASys latency primarily arises from two intentional design choices: (i) dual retrieval passes (FAQ and document search), and (ii) clarification checks executed by the manager agent. While these steps add computational cost, they are essential for achieving robustness on ambiguous or potentially unanswerable queries. In practice, URASys accepts a modest latency increase in exchange for significantly improved factual reliability, clarification behavior, and overall answer quality, representing a domain-appropriate trade-off.
+
+
+
+\begin{table*}[!t]
+\centering
+\caption{
+Comparison of SOTA methods on the UniQA dataset for university admission counseling. Results are reported across three subsets: Overall, Unanswerable, and Ambiguous.
+}
+\label{tab:result_1}
+\begin{tabular}{l|c|c|c}
+\toprule
+\textbf{Method} & \textbf{Overall} & \textbf{Unans.} & \textbf{Ambig.} \\
+\midrule
+GPT-4o             & 49.3 & 37.1 & 18.2 \\
+Gemini~2.5~Pro     & 24.0 & 25.8 & 12.1 \\
+Claude~3.7~Sonnet  & 37.8 & 16.9 & 15.4 \\
+\midrule
+\textbf{URASys (Ours)} & \textbf{85.0} & \textbf{82.6} & \textbf{81.2} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+\begin{table*}[!ht]
+\centering
+\caption{Descriptions of the six question topics.}
+\label{tab:topic_description}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{p{0.3\linewidth} p{0.7\linewidth}}
+    \toprule
+    \textbf{Topic} & \textbf{Description} \\
+    \midrule
+    Admissions Information 2025 &
+      Information related to the 2025 university admission cycle. \\[3pt]
+
+    Program Descriptions &
+      Program-level details including curriculum design, study duration, admission tracks, post-graduation prospects, subject requirements, and distinctive features. \\[3pt]
+
+    Administration Contacts &
+      Names, roles, and contact information of university leaders and administrative units. \\[3pt]
+
+    Faculty Overviews &
+      High-level faculty descriptions covering organization, mission, sub-units, capacity, and achievements. \\[3pt]
+
+    Laboratories &
+      Laboratory introductions, equipment availability, usage policies, eligibility, and reservation instructions. \\[3pt]
+
+    Others &
+      Questions outside the five defined categories. \\
+    \bottomrule
+\end{tabular}
+}
+\end{table*}
+
+
+\section{Additional Experiments and Analysis}
+\label{sec:further_experiments}
+
+\subsection{Comparison with Standalone LLMs}
+
+To assess the generalizability of URASys beyond retrieval-augmented systems, we compare it against three SOTA LLM baselines: GPT-4o\footnote{\url{https://platform.openai.com/docs/models/gpt-4o}}, Gemini~2.5~Pro\footnote{\url{https://ai.google.dev/gemini-api/docs/models\#gemini-2.5-pro}}, and Claude~3.7~Sonnet\footnote{\url{https://www.anthropic.com/news/claude-3-7-sonnet}}. All models are evaluated under identical prompts on the UniQA dataset, with real-time search enabled via the Brave Search API\footnote{\url{https://brave.com/search/api/}}. As shown in Table~\ref{tab:result_1}, URASys significantly outperforms these baselines across all subsets, yielding 30--60\% absolute accuracy gains. While GPT-4o benefits from external search, it frequently produces confident but partially incorrect answers, and both Gemini~2.5~Pro and Claude~3.7~Sonnet struggle with Vietnamese and unanswerable queries.
+
+This performance gap is partly explained by UniQA documents originating from institutional sources not fully indexed by public search engines. However, even under idealized internet-access conditions, standalone LLMs still fail to maintain factual reliability and clarification behavior. In contrast, URASys sustains high accuracy through structured retrieval and agent-based reasoning, reinforcing the need for domain-grounded retrieval pipelines in multilingual, high-stakes QA.
+
+
+\subsection{Analysis of User Query Behavior}
+
+After interacting freely with URASys during the human evaluation, participants were asked to categorize all submitted questions into one of six predefined topic categories. The topic taxonomy is summarized in Table~\ref{tab:topic_description}.
+
+% \begin{figure*}[!ht]
+% \centering
+
+% % --- Left chart ---
+% \begin{subfigure}[b]{0.4\textwidth}
+% \centering
+% \begin{tikzpicture}
+%   \def\r{2cm}
+%   \def\start{0}
+%   \foreach \P/\pat/\lbl in {
+%     9/north east lines/Topic~1,
+%     15/horizontal lines/Topic~2,
+%     5/north west lines/Topic~3,
+%     30/dots/Topic~4,
+%     13/crosshatch/Topic~5,
+%     28/checkerboard/Topic~6
+%   }
+%   {
+%     \pgfmathsetmacro\ang{360*\P/100}
+%     \fill[pattern=\pat, draw=black] 
+%       (0,0) -- (\start:\r) arc (\start:\start+\ang:\r) -- cycle;
+%     \pgfmathsetmacro\mid{\start + \ang/3}
+%     \node[font=\scriptsize, text width=2cm, align=center] at (\mid:2.5) {\lbl\\\P\%};
+%     \xdef\start{\start+\ang}
+%   }
+% \end{tikzpicture}
+% \caption{First-year students}
+% \label{fig:sv1-chart}
+% \end{subfigure}
+% \hspace{-0.01\linewidth}   % chỉnh khoảng cách giữa 2 hình
+% % --- Right chart ---
+% \begin{subfigure}[b]{0.4\textwidth}
+% \centering
+% \begin{tikzpicture}
+%   \def\r{2cm}
+%   \def\start{0}
+%   \foreach \P/\pat/\lbl in {
+%     13/north east lines/Topic~1,
+%     34/horizontal lines/Topic~2,
+%     20/north west lines/Topic~3,
+%     17/dots/Topic~4,
+%      2/crosshatch/Topic~5,
+%      14/checkerboard/Topic~6
+%   }
+%   {
+%     \pgfmathsetmacro \ang{360*\P/100}
+%     \fill[pattern=\pat, draw=black] 
+%       (0,0) -- (\start:\r) arc (\start:\start+\ang:\r) -- cycle;
+%     \pgfmathsetmacro\mid{\start + \ang/2}
+%     \node[font=\scriptsize, text width=2cm, align=center] at (\mid:2.5) {\lbl\\\P\%};
+%     \xdef\start{\start+\ang}
+%   }
+% \end{tikzpicture}
+% \caption{High-school students}
+% \label{fig:hs12-chart}
+% \end{subfigure}
+
+% \caption{Comparison of question category distributions between the two participant groups.}
+% \label{fig:topic-comparison}
+% \end{figure*}
+
+\begin{figure*}[!ht]
+\centering
+\includegraphics[width=0.78\textwidth]{latex/figures/fig62.pdf}
+\vspace*{-1mm}
+\caption{Comparison of question category distributions between the two participant groups.}
+\label{fig:topic-comparison}
+\end{figure*}
+
+
+
+
+The topic distributions reveal clearly divergent information-seeking patterns across user groups (Figure~\ref{fig:topic-comparison}). First-year students demonstrate a strong interest in institutional and organizational knowledge, with the highest proportion of queries targeting faculty-level information (Topic 4, 30\%), followed by a notable share classified as Others (28\%). This indicates informational needs that extend beyond formal documentation and may involve experiential, procedural, or tacit knowledge not explicitly standardized or publicly disseminated. In contrast, high-school students focus primarily on admission- and program-related questions (Topics 1 and 2, totalling 47\%), reflecting a goal-oriented and decision-driven search behavior aligned with pre-enrollment planning.
+
+Overall, these findings emphasize user differentiation in informational depth and scope, highlighting the importance of role-sensitive, intent-aware, and maturity-aligned QA strategies. Systems like URASys may benefit from adaptive response shaping, such as varying explanation granularity, source transparency, and follow-up prompting based on user identity and stage in the academic journey.
+
+
+
+
+
+
+
+% \subsection{User Query Topic Analysis}
+
+% We collected real-world feedback from a group of student evaluators. Twenty participants were involved in the study, divided evenly into two cohorts:
+% \begin{itemize}
+% \item \textbf{SV1:} Ten first-year university students
+% \item \textbf{HS12:} Ten grade-12 high school students
+% \end{itemize}
+% Each participant spent approximately 30 minutes interacting with the URASys interface, during which they asked various school-related questions based on their actual concerns. After the session, they answered a standardized set of 200 test questions and were then asked to classify each question into one of six predefined topic categories.
+
+% \begin{table}[h]
+%   \centering
+%   \small
+%   \caption{Descriptions of the Six Question Topics}
+%   \label{tab:topic_description}
+%   \setlength{\extrarowheight}{3pt}
+%   \setlength{\tabcolsep}{6pt}   % less horizontal padding
+%   \begin{tabular}{@{} >{\bfseries}p{0.3\columnwidth}
+%                    p{0.7\columnwidth} @{}}
+%     \toprule
+%     Topic & Description \\
+%     \midrule
+%     Admissions Information 2025 &
+%       Covers everything related to the 2025 university admission cycle \\[4pt]
+%     Program Descriptions &
+%       Detailed overviews of each academic program: curriculum structure, length of study, admission streams, post-graduation career opportunities, required subject combinations, and unique program features. \\[4pt]
+%     Administration Contacts &
+%       Names, titles, contact information, and roles of key leaders in faculties, research centers, institutes, and administrative departments within the university. \\[4pt]
+%     Faculty Overviews &
+%       High‑level summaries of each faculty: organizational structure, mission, constituent units, faculty headcount, notable achievements, and administrative contacts. \\[4pt]
+%     Laboratories &
+%       Introductions to laboratories: available equipment, training objectives, target users, locations, and reservation procedures. \\[4pt]
+%     Others &
+%       Question that do not fall into any of the five categories above. \\
+%     \bottomrule
+%   \end{tabular} 
+% \end{table}
+
+% \begin{figure}[h]
+%   \centering
+%   \begin{tikzpicture}
+%     % bán kính
+%     \def\r{2cm}
+%     % góc khởi đầu
+%     \def\start{0}
+
+%     % 1) VẼ PIE CHART
+%     \foreach \P/\pat/\lbl in {
+%       9/north east lines/Topic~1,
+%       15/horizontal lines/Topic~2,
+%       5/north west lines/Topic~3,
+%       30/dots/Topic~4,
+%       13/crosshatch/Topic~5,
+%       28/checkerboard/Topic~6
+%     }
+%     {
+%       \pgfmathsetmacro\ang{360*\P/100}
+%       \fill[pattern=\pat, draw=black] 
+%         (0,0) -- (\start:\r) arc (\start:\start+\ang:\r) -- cycle;
+%       \pgfmathsetmacro\mid{\start + \ang/3}
+%       \node[
+%         font=\scriptsize,
+%         text width=2cm,
+%         align=center
+%       ] at (\mid:2.5) {\lbl\\\P\%};
+%       \xdef\start{\start+\ang}
+%     }
+%   \end{tikzpicture}
+%   \caption{Distribution of Question Categories in First-Year Student Interaction}
+%   \label{fig:sv1-chart}
+% \end{figure}
+
+% \begin{figure}[ht]
+%   \centering
+% \begin{tikzpicture}
+%   % bán kính
+%   \def\r{2cm}
+%   % góc khởi đầu
+%   \def\start{0}
+
+%   % 1) VẼ PIE CHART
+%   \foreach \P/\pat/\lbl in {
+%     13/north east lines/Topic~1,
+%     34/horizontal lines/Topic~2,
+%     20/north west lines/Topic~3,
+%     17/dots/Topic~4,
+%      2/crosshatch/Topic~5,
+%      14/checkerboard/Topic~6
+%   }
+%   {
+%     \pgfmathsetmacro \ang{360*\P/100}
+%      \fill[pattern=\pat, draw=black] 
+%       (0,0) -- (\start:\r) arc (\start:\start+\ang:\r) -- cycle;
+
+%     \pgfmathsetmacro\mid{\start + \ang/2}
+%     % \node[font=\scriptsize] at (\mid:2.5) {\lbl \P%};
+%     \node[
+%       font=\scriptsize,
+%       text width=2cm,
+%       align=center
+%     ] at (\mid:2.5) {\lbl\\\P\%};
+%     % Cập nhật góc bắt đầu
+%     % \xdef\start{\start+\ang}
+%     \xdef\start{\start+\ang}
+%   }
+% \end{tikzpicture}
+%   \caption{Distribution of Question Categories in High-School Student Interaction}
+%   \label{fig:hs12-chart}
+% \end{figure}
+
+% An analysis of the topic distributions (Figures 4 and 5) reveals distinct patterns in the types of questions asked by the two participant cohorts. First-year university students (SV1) exhibited a greater tendency to inquire about internal university structures and operational details, particularly topics concerning faculty and departmental overviews, laboratory and workshop access, and a broad range of miscellaneous inquiries (Topics 3, 5, and 6). Notably, a significant portion of their questions fell under the "Other Topics" category, suggesting that many of their concerns extended beyond the scope of standard institutional documentation. This indicates a demand for information that may not be readily available in existing official materials, such as personal experiences, informal procedures, or less-publicized aspects of university life. In contrast, high-school seniors (HS12) predominantly focused on admissions-related topics, including entry requirements, timelines, and detailed descriptions of academic programs (Topics 1 and 2). This aligns with their status as prospective applicants preparing for university entrance, reflecting a clear interest in navigating the application process and evaluating available fields of study. These trends underscore the importance of tailoring information systems such as URASys to the distinct informational needs of different user populations. While HS12 users benefit most from structured, admissions-focused content, SV1 users require broader, more exploratory access to institutional knowledge.
+
+
+
+\section{Prompt Templates for Agent Reasoning}
+\label{sec:prompt-appendix}
+
+As detailed in Section~\ref{sec:design}, each URASys agent is guided by a carefully designed prompt that specifies its reasoning logic, retrieval strategy, and interaction policy. These prompts coordinate the behavior of the Manager Agent as well as the two retrieval sub-agents: the Document Search Agent and the FAQ Search Agent. This configuration supports coherent workflows and ensures consistently high-quality responses across diverse QA scenarios. Figure~\ref{fig:prompt_manager} shows the prompt for the Manager Agent, while Figure~\ref{fig:prompt_document} and Figure~\ref{fig:prompt_faq} present the prompts used by the Document Search Agent and the FAQ Search Agent, respectively. These are the exact templates employed in the experiments on public datasets discussed in Section~\ref{sec:experiments}.
+
+
+
+
+
+
+\begin{figure*}[t]
+\begin{promptblock}
+MANAGER_AGENT_INSTRUCTION_PROMPT = """ 
+# Persona
+You are the "AI Assistant," an expert AI focused on efficiently and accurately answering questions using the provided context passages.
+# Current State
+- Current Search Attempt: {current_attempt}
+- Max Search Attempts: {max_retries}
+# The Supreme Goal: The "Just Enough" Principle
+Your absolute highest priority is to answer the user's *specific, underlying need*, not just the broad words they use. You must act as a **guide**, not an information dump. This means:
+- If a query is broad, your job is to **help the user specify it.**
+- If a query is specific, your job is to **answer it directly.**
+- **NEVER** dump a summary of all found information and then ask "what do you want to know more about?". This is a critical failure.
+# Core Directives
+1.  **Search is for Understanding:** Your first search on a broad topic is not to find an answer, but to **discover the available categories/options** to guide the user.
+2.  **Troubleshoot Vague Failures:** If a search fails because the user's query is incomplete, ask for more clues.
+3.  **Evidence-Based Actions:** All answers and examples MUST come from the retrieved context passages.
+4.  **Language and Persona Integrity:**
+    *   All responses **MUST** be in **language based on an user**.
+    *   **Self-reference:** Use the pronoun **"I"** to refer to yourself. Only state your full name if asked directly.
+    *   **Expert Tone and Phrasing:** You **MUST** speak from a position of knowledge, as a representative of the university.
+        *   **DO:** Use confident, knowledgeable phrasing like: *"Now, I...", "About [topic], I see that..."*
+        *   **AVOID:** **NEVER** use phrases that imply real-time discovery. **FORBIDDEN** phrases include: *"I search...", "I have...", "In my researching,..."*
+    *   **Conceal Internal Mechanics:** **NEVER** mention your tools or processes.
+5.  ** Queries:** All search queries **MUST** be in Vietnamese.
+6.  **No Fabrication:** If you cannot find information, state it clearly.
+# Decision-Making Workflow: A Strict Gate System
+**Step 1: Analyze Request & Search**  
+*   Examine the user's query. Formulate and execute searches over the loaded context passages to understand the information landscape.
+**Step 2: Evaluate Results & Choose a Path (Choose ONLY ONE)**  
+Based on the user's query type and your search results, you MUST follow one of these strict paths.
+*   **PATH A: The "Specific Answer" Gate**  
+    *   **CONDITION:** The user's query was **ALREADY specific** AND you found a direct answer in the context passages.  
+    *   **ACTION:** Provide the specific, direct answer. Your turn ends.
+*   **PATH B: The "Clarification" Gate (Default for Broad Queries)**  
+    *   **CONDITION:** The user's query was **BROAD** AND your search revealed **multiple distinct categories**.  
+    *   **ACTION:**  
+        1.  **STOP.**  
+        2.  Ask a clarifying question using an **Expert Tone**.  
+        3.  This question **MUST** only contain the **NAMES** of the categories you found as examples.  
+        4.  **STRICTLY FORBIDDEN:** Do not include any details (numbers, dates, etc.) in this question.  
+*   **PATH C: The "Refine & Retry" Gate**  
+    *   **CONDITION:** Your search failed or was insufficient, and the query was **vague/incomplete**. You still have attempts left.  
+    *   **ACTION:** First, try to self-correct. If impossible, ask the user for more clues.
+*   **PATH D: The "No Information" Gate**  
+    *   **CONDITION:** You have exhausted all attempts in `PATH C`.  
+    *   **ACTION:** Politely inform the user you could not find the information.
+"""
+\end{promptblock}
+\vspace*{-0.2cm}
+
+\caption{System prompt for the Manager Agent, which governs the high-level reasoning workflow in URASys. It encodes the ``Just Enough'' principle, promoting clarification-first behavior, grounded answer generation, and adaptive control based on retrieved evidence.}
+\label{fig:prompt_manager}
+\end{figure*}
+
+
+\begin{figure*}[t]
+\begin{promptblockup}
+DOCUMENT_SEARCH_INSTRUCTION_PROMPT = """
+## Role
+You are "Document Specialist," an AI expert dedicated to precisely locating and retrieving information from the document database.
+## Primary Task & Iterative Workflow (Internal Loop: Max {max_retries} Tool Call Attempts)
+Your primary task is to answer the user's question or fulfill their information request by iteratively searching the document database using the `document_retrieval_tool`. You **MUST** follow this iterative workflow, making up to {max_retries} tool call attempts for the current user request.
+**Internal Loop & State:**
+* You will manage an internal attempt counter for tool calls for the current user's request. This counter starts at 1 for your first tool call.
+**Workflow Steps (Repeated up to {max_retries} times if necessary):**
+1. **Analyze User's Request & Formulate Search Query (Current Attempt)**:
+    * Carefully examine the user's current question or information request.
+    * Identify the core intent and specific information needed.
+    * Extract or infer relevant keywords, topics, and concepts related to documents (e.g., regulations, forms, announcements, academic subjects, research areas).
+    * Construct a concise and effective search query in **Vietnamese and English**.
+    * **If this is attempt 2 or {max_retries} (because the previous tool call was unsatisfactory):** You **MUST** formulate a *new and different* search query. Do **NOT reuse the exact same query** from a previous attempt. Refer to "Query Variation Tactics" below.
+2. **Execute Search via `document_retrieval_tool` (Current Attempt)**:
+    * Prepare the input for the `document_retrieval_tool` as a JSON object. Example: `{{"query": "your Vietnamese query here", "top_k": 3}}`. (You can adjust `top_k` if you deem it necessary, otherwise default to 3).
+    * Your immediate output **MUST** be a request to invoke the `document_retrieval_tool` with your formulated query.
+3. **Evaluate Tool's Results & Decide Next Action (After Tool Execution)**:
+    * (The system will execute the tool and provide you with its results, likely a list of document snippets or summaries.)
+    * Thoroughly review the document information returned by the `document_retrieval_tool`.
+    * **If a retrieved document (or its snippet/summary) directly and adequately addresses the user's original request:**
+        * The iterative process for this user request stops.
+        * Your final output should be based *only* on this relevant document content. You might summarize key information or point to the most relevant part.
+    * **If the tool returns an empty list, or if the retrieved documents are irrelevant or insufficient to directly and adequately address the user's request:**
+        * This tool call attempt is considered **unsuccessful**.
+        * Increment your internal attempt counter.
+        * **If your internal attempt counter is now less than or equal to {max_retries}:**
+            * You **MUST** make another attempt. Return to Step 1 of this workflow to formulate a *new and different* search query. Your subsequent action will be to invoke the `document_retrieval_tool` again (as per Step 2).
+        * **If your internal attempt counter has exceeded {max_retries} (meaning {max_retries} unsuccessful tool calls have been made):**
+            * The iterative process stops. Proceed to "Final Output Preparation."
+    * **Do NOT generate explanatory text or dialogue *between tool calls* if you are attempting another search.** Your output should be the next tool call request or the final answer.
+**Final Output Preparation (After Loop Ends):**
+* If relevant document information was found within your {max_retries} tool call attempts: Your final response is the relevant information extracted or summarized *only* from the retrieved document(s).
+* If, after exhausting your {max_retries} tool call attempts, you still have not found relevant document information: Your final response **MUST** be the exact phrase: **"No relevant document found for the current request."** Do not add any other explanation.
+## Operational Context
+- **Data Source**: document database (e.g., official documents, academic papers, regulations, forms, announcements - mostly in Vietnamese).
+- **Tool**: `document_retrieval_tool`. Input: JSON `{{"query": "Vietnamese query", "top_k": N}}`. Output: List of relevant document snippets/summaries or document identifiers.
+## Core Responsibility: Strict Tool Adherence & No Fabrication
+- **MANDATORY**: **ALWAYS** use `document_retrieval_tool`.
+- **CRITICAL**: **NO FABRICATION**. Base answers *strictly* on tool-retrieved content.
+## Guidelines for Formulating Effective Search Queries
+- **Language**: Queries MUST be in Vietnamese and English.
+- **Keywords & Concepts**: Focus on relevant keywords, official terminology, document types (e.g., "regulation", "announcement", "form", "syllabus"), or specific topics.
+\end{promptblockup}
+\end{figure*}
+
+\begin{figure*}[t]
+\begin{promptblockdown}
+- **Clarity**: Clear, concise queries.
+- **Specificity (Context)**:
+**Query Variation Tactics (for new attempts)**:
+    * Synonyms.
+    * Rephrasing.
+    * Adding/Removing Contextual Keywords: "on the morning", "in New Year Eve".
+    * Focus on Nouns, Official Terms, and Document Types.
+    * Example Iteration for "I want to know the first person going to the moon.":
+        1. Attempt 1 Query: "first person going to the moon"
+        2. If no good results, Attempt 2 Query: "first person outside the Earth" or "first person to land on the moon"
+## Constraints & Key Reminders
+- **Exclusivity**: Information pertains *only* to documents.
+- **Vietnamese Search Queries Only**: Queries to `document_retrieval_tool` **must be in Vietnamese**.
+- **Strict Tool Reliance**.
+- **Iterative Refinement (Max {max_retries} Tool Calls per user request)**: Try *different* queries.
+- **Understand Tool Limitations**: The tool searches a pre-existing document database.
+"""
+\end{promptblockdown}
+\vspace*{-0.2cm}
+
+\caption{Prompt template used by the Document Search Agent. The agent performs iterative querying over an academic document corpus via the \texttt{document\_retrieval\_tool}, refining its search strategy across attempts and returning answers strictly grounded in retrieved content.}
+\label{fig:prompt_document}
+\end{figure*}
+
+\begin{figure*}[th]
+\begin{promptblockup}
+FAQ_SEARCH_INSTRUCTION_PROMPT = """
+## Role
+You are "FAQ Specialist," an AI expert dedicated to precisely locating and retrieving answers from the FAQ database.
+## Primary Task & Iterative Workflow (Internal Loop: Max {max_retries} Tool Call Attempts)
+Your primary task is to answer the user's question by iteratively searching the FAQ database using the `faq_retrieval_tool`. You **MUST** follow this iterative workflow, making up to {max_retries} tool call attempts for the current user question.
+**Internal Loop & State:**
+*   You will manage an internal attempt counter for tool calls for the current user's question. This counter starts at 1 for your first tool call.
+**Workflow Steps (Repeated up to {max_retries} times if necessary):**
+1.  **Analyze User's Question & Formulate Vietnamese Search Query (Current Attempt)**:
+    *   Carefully examine the user's current question.
+    *   Identify the core intent and specific information needed.
+    *   Extract or infer relevant **Vietnamese** keywords.
+    *   Construct a concise and effective search query in **Vietnamese**.
+    *   **If this is attempt 2 or {max_retries} (because the previous tool call was unsatisfactory):** You **MUST** formulate a *new and different* Vietnamese search query. Do **NOT reuse the exact same query** from a previous attempt. Refer to "Query Variation Tactics" below.
+2.  **Execute Search via `faq_retrieval_tool` (Current Attempt)**:
+    *   Prepare the input for the `faq_retrieval_tool` as a JSON object. Example: `{{"query": "your Vietnamese query here", "top_k": 5}}`. (You can adjust `top_k` if you deem it necessary, otherwise default to 5).
+    *   Your immediate output **MUST** be a request to invoke the `faq_retrieval_tool` with your formulated query.
+3.  **Evaluate Tool's Results & Decide Next Action (After Tool Execution)**:
+    *   (The system will execute the tool and provide you with its results.)
+    *   Thoroughly review the FAQ(s) (question-answer pairs) returned by the `faq_retrieval_tool`.
+    *   **If a retrieved FAQ directly and adequately answers the user's original question:**
+        *   The iterative process for this user question stops.
+        *   Your final output should be based *only* on this relevant FAQ content.
+    *   **If the tool returns an empty list, or if the retrieved FAQs are irrelevant or insufficient to directly and adequately answer the user's original question:**
+        *   This tool call attempt is considered **unsuccessful**.
+        *   Increment your internal attempt counter.
+        *   **If your internal attempt counter is now less than or equal to {max_retries}:**
+            *   You **MUST** make another attempt. Return to Step 1 of this workflow to formulate a *new and different* Vietnamese search query. Your subsequent action will be to invoke the `faq_retrieval_tool` again (as per Step 2).
+\end{promptblockup}
+
+\end{figure*}
+\begin{figure*}[!t]
+\begin{promptblockdown}
+        *   **If your internal attempt counter has exceeded {max_retries} (meaning {max_retries} unsuccessful tool calls have been made):**
+            *   The iterative process stops. Proceed to "Final Output Preparation."
+    *   **Do NOT generate explanatory text or dialogue *between tool calls* if you are attempting another search.** Your output should be the next tool call request or the final answer.
+**Final Output Preparation (After Loop Ends):**
+*   If a relevant FAQ was found within your {max_retries} tool call attempts: Your final response is the content of that FAQ (or a summary derived *only* from it).
+*   If, after exhausting your {max_retries} tool call attempts, you still have not found a relevant FAQ that directly answers the user's question: Your final response **MUST** be the exact phrase: **"No relevant document found for the current request."** Do not add any other explanation.
+## Operational Context
+-   **Data Source**: FAQ database (Vietnamese).
+-   **Tool**: `faq_retrieval_tool`. Input: JSON `{{"query": "Vietnamese query", "top_k": N}}`. Output: List of FAQs.
+## Core Responsibility: Strict Tool Adherence & No Fabrication
+-   **MANDATORY**: **ALWAYS** use `faq_retrieval_tool`.
+-   **CRITICAL**: **NO FABRICATION**. Base answers *strictly* on tool-retrieved content.
+## Guidelines for Formulating Effective Vietnamese Search Queries
+-   **Language**: Queries **Based on user language**.
+-   **Keywords**: Focus on relevant Vietnamese keywords.
+-   **Clarity**: Clear, concise queries.
+## Constraints & Key Reminders
+-   **Vietnamese or English Search Queries Only**.
+-   **Strict Tool Reliance**.
+-   **Iterative Refinement (Max {max_retries} Tool Calls per user question)**: Try *different* queries.
+-   **Understand Tool Limitations**.
+"""
+\end{promptblockdown}
+\vspace*{-0.2cm}
+
+\caption{Prompt template used by the FAQ Search Agent. The agent retrieves answers from a structured FAQ database by issuing iterative queries through the \texttt{faq\_retrieval\_tool}, reformulating as needed and relying solely on retrieved content with fallback handling.}
+\label{fig:prompt_faq}
+\end{figure*}
+
+% --------- PACKAGES YOU NEED ----------
+% \usepackage{mdframed}
+% \usepackage{xcolor}
+% \usepackage{enumitem}
+% --------------------------------------
+
+% \section{Illustrated Reasoning Example}
+
+% % ================= USER =====================
+% \begin{tcolorbox}[userbubble]
+% I want to study Computer Engineering. How much is the tuition fee?
+% \end{tcolorbox}
+
+% % ================= THOUGHT 1 =================
+% \begin{tcolorbox}[thoughtbubble]
+% \thoughttag
+
+% \textbf{Let’s Get This Information}
+
+% Okay, so the user needs the tuition fees for the Computer Engineering major. This is a pretty straightforward request, and I know exactly how to handle it. It’s a very specific question, so I’ll need to use the \texttt{search\_information} tool to get the most accurate and up-to-date answer. I’m going to formulate the search query in Vietnamese to ensure the best results. Let me see… I’ll search for “học phí ngành kỹ thuật máy tính” — that should do the trick! Now, let’s see what the tool turns up.
+% \end{tcolorbox}
+
+% % ================= TOOL CALL 1 =================
+% \begin{tcolorbox}[toolbubble]
+% \textbf{Tool Call:} \texttt{search\_information}
+% \end{tcolorbox}
+
+% % ================= TOOL CALL 2 =================
+% \begin{tcolorbox}[toolbubble]
+% \textbf{Tool Call:} \texttt{search\_information}
+% \end{tcolorbox}
+
+% % ================= THOUGHT 2 =================
+% \begin{tcolorbox}[thoughtbubble]
+% \thoughttag
+
+% \textbf{Okay, let me break this down in my head...}
+
+% The user's question was straightforward enough: what's the Computer Engineering tuition going to cost? I looked through the search results, and it seems like there are a couple of tracks to consider. First, the “Standard’’ and “Talent’’ programs — these are likely the typical academic tracks. Their tuition appears to be around 15 million VND per semester, and the full program spans four years. A nice detail is that specialization begins in the second year.
+
+% The other programs, likely more specialized or internationally affiliated, appear to have significantly higher tuition. I saw something around 128 million VND, which likely indicates a different curriculum structure or program format. I should summarize these options clearly and ask the user which program they’re referring to.
+% \end{tcolorbox}
+
+% % ================= FINAL ANSWER =================
+% \begin{tcolorbox}[answerbubble]
+% Hello!  
+
+% The university does not publish a separate tuition fee specifically for the \textit{Computer Engineering} major. However, this major is typically part of either the \textbf{Standard Program} or the \textbf{Talent Program} at Ho Chi Minh City University of Technology (HCMUT).
+
+% \begin{itemize}
+%     \item \textbf{For the Standard and Talent Programs:}  
+%     the tuition fee is approximately \textbf{15 million VND per semester}, with a 4-year curriculum. Students specialize starting from the second year.
+
+%     \item \textbf{Additionally,} the university offers several other programs with tuition around \textbf{128 million VND per semester}, usually running for 3 years.  
+%     These programs are taught at the Ly Thuong Kiet campus.
+% \end{itemize}
+
+% If you can tell me which program you are specifically interested in, I can provide a more precise estimate!
+% \end{tcolorbox}
+
+
+
+
+
+
+
+
+
+% What song did she release in 2013 in response to a speech?
+
+% HippoRAG ----    Flawless
+
+% MiniRAG ------ In 2013, Beyoncé released the song "Flawless" in response to a speech by Nigerian author Chimamanda Ngozi Adichie titled "We Should All Be Feminists," which was delivered at a TEDxEuston conference in April 2013. The song reflects Beyoncé's alignment with the feminist movement and her belief in equality.
+
+
+% NodeRAG ---- In 2013, Beyoncé released the song \"Flawless,\" which sampled the speech "We should all be feminists\" delivered by Chimamanda Ngozi Adichie at a TEDxEuston conference in April 2013.
+
+
+% NaiveRAg --- BM25"Flawless"
+
+% DenseRAG      Beyoncé released "Flawless" in 2013, which sampled a speech by Chimamanda Ngozi Adichie.
+
+
+% NavieRAG Hyrbid --- "Flawless" was released in 2013 and sampled a speech delivered by Chimamanda Ngozi Adichie.
+
+
+
+% \textbf{Reasoning.} Okay, this is a familiar query. The user's asking about a specific Beyoncé song released in 2013 that was a response to a speech. I've definitely addressed this before. No need for further analysis or external searches. It's a matter of direct recall from my established knowledge base. I can provide the precise answer immediately.
+
+% \textbf{Answer.} Beyoncé released the song "Flawless" in late 2013, in which she sampled the speech "We Should All Be Feminists" by Nigerian author Chimamanda Ngozi Adichie.
+
+
+% In what year did Nintendo reveal the start of development on what would become The Wind Waker?
+
+% BM25: Nintendo revealed the start of development on what would become The Wind Waker in 2003.
+
+% I've been asked this before, and unfortunately, the situation hasn't changed. I've searched my available information for the year Nintendo revealed the start of development on *The Wind Waker*, and I'm still coming up empty. It's just not in the data I have access to. I need to be upfront about that.
+
+% Mình không tìm thấy thông tin về năm Nintendo công bố bắt đầu phát triển trò chơi The Wind Waker.
+
+
+
+
+\end{document}

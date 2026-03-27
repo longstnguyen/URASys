@@ -1,0 +1,25 @@
+{
+  "name": "urasys-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@copilotkit/react-core": "1.8.14",
+    "@copilotkit/react-ui": "1.8.14",
+    "@copilotkit/runtime": "1.8.14",
+    "@langchain/google-genai": "^0.2.18",
+    "next": "14.2.29",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.28",
+    "@types/react": "18.3.20",
+    "@types/react-dom": "18.3.5",
+    "typescript": "5.8.2"
+  }
+}

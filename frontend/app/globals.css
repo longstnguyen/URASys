@@ -1,0 +1,66 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #0f1117;
+  color: #e2e8f0;
+}
+
+/* CopilotKit CSS variable overrides — dark theme */
+:root {
+  /* primary-color = main text color + user bubble background */
+  --copilot-kit-primary-color: #f1f5f9;
+  /* contrast-color = text on primary (e.g. inside user bubble) */
+  --copilot-kit-contrast-color: #0f1117;
+  /* main chat background */
+  --copilot-kit-background-color: #1a1d27;
+  /* input box background */
+  --copilot-kit-input-background-color: #252836;
+  /* secondary background (assistant bubble bg) */
+  --copilot-kit-secondary-color: #252836;
+  /* text on secondary elements */
+  --copilot-kit-secondary-contrast-color: #f1f5f9;
+  /* dividers */
+  --copilot-kit-separator-color: #2d3148;
+  /* muted / placeholder text */
+  --copilot-kit-muted-color: #64748b;
+  --copilot-kit-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Chat window full height */
+.copilotKitChat {
+  height: 100% !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: #1a1d27 !important;
+}
+
+.copilotKitMessagesContainer {
+  background: #1a1d27 !important;
+}
+
+/* Thin scrollbar for sidebar */
+aside::-webkit-scrollbar {
+  width: 4px;
+}
+aside::-webkit-scrollbar-track {
+  background: transparent;
+}
+aside::-webkit-scrollbar-thumb {
+  background: #2a2d44;
+  border-radius: 2px;
+}
+aside::-webkit-scrollbar-thumb:hover {
+  background: #3d4060;
+}
+
+/* Sidebar slide animation (mobile) */
+.ura-sidebar {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
