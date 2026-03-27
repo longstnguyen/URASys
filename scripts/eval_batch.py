@@ -213,6 +213,65 @@ def _doc_results_to_output(query: str, doc_raw: list, top_k: int) -> dict:
             "predicted_answer": merged[0]["text"] if merged else ""}
 
 
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# BASELINE LLM GENERATION — standard RAG (retrieve → prompt → answer)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+_BASELINE_RAG_SYSTEM = """\
+You are a helpful QA assistant. Answer the user's question using ONLY the provided context passages below.
+
+Rules:
+1. If the context contains a clear answer, provide it concisely.
+2. If the context does NOT contain enough information to answer, reply exactly: "Không tìm thấy thông tin phù hợp trong cơ sở dữ liệu."
+3. If the question is too vague or ambiguous to answer (missing subject, time frame, or scope), ask a brief clarifying question to help the user specify their intent.
+4. Do NOT fabricate information. Only use what is in the context.
+5. Respond in the same language as the user's question.
+"""
+
+
+def _baseline_generate(query: str, results: list, history: list = None) -> str:
+    """Standard RAG: feed retrieved chunks to LLM and generate an answer."""
+    if not results:
+        return "Không tìm thấy thông tin phù hợp trong cơ sở dữ liệu."
+
+    from google.genai import types
+
+    # Build context from retrieved chunks
+    context_parts = []
+    for i, r in enumerate(results):
+        text = r.get("text", "")
+        if text:
+            context_parts.append(f"[Passage {i+1}]\n{text}")
+    context_str = "\n\n".join(context_parts)
+
+    messages: list[types.Content] = []
+
+    # Prior conversation turns (if interactive mode)
+    if history:
+        for h in history[-3:]:
+            messages.append(types.Content(role="user", parts=[types.Part(text=h["query"])]))
+            messages.append(types.Content(role="model", parts=[types.Part(text=h["answer"])]))
+
+    # Current user question with context
+    user_msg = f"Context:\n{context_str}\n\nQuestion: {query}"
+    messages.append(types.Content(role="user", parts=[types.Part(text=user_msg)]))
+
+    try:
+        response = _gemini_client.models.generate_content(
+            model=_retrieval_model_id,
+            contents=messages,
+            config=types.GenerateContentConfig(
+                system_instruction=_BASELINE_RAG_SYSTEM,
+                temperature=0.2,
+                top_p=0.1,
+            ),
+        )
+        text = response.text.strip() if response.text else ""
+        return text or "Không tìm thấy thông tin phù hợp trong cơ sở dữ liệu."
+    except Exception:
+        return "Không tìm thấy thông tin phù hợp trong cơ sở dữ liệu."
+
+
 async def _search_urasys(query: str, top_k: int = 5) -> dict:
     """Full URASys agentic pipeline with sub-agent LLM loops."""
     from google.genai import types
@@ -595,8 +654,9 @@ def _interactive_search(query: str, strategy: str = "urasys", top_k: int = 5, hi
 
     if is_baseline:
         steps = [
-            {"label": "Encode Query",  "state": "pending", "detail": "", "t": 0.0},
-            {"label": "Retrieve",      "state": "pending", "detail": "", "t": 0.0},
+            {"label": "Encode Query",    "state": "pending", "detail": "", "t": 0.0},
+            {"label": "Retrieve",        "state": "pending", "detail": "", "t": 0.0},
+            {"label": "Generate Answer", "state": "pending", "detail": "", "t": 0.0},
         ]
     else:
         steps = [
@@ -646,6 +706,16 @@ def _interactive_search(query: str, strategy: str = "urasys", top_k: int = 5, hi
         steps[1]["detail"] = f"{len(result['results'])} results"
         steps[1]["t"] = t_s
         render()
+        # Step 3: LLM Generate
+        steps[2]["state"] = "running"
+        steps[2]["detail"] = "generating from context…"
+        render()
+        t2 = time.time()
+        result["predicted_answer"] = _baseline_generate(query, result.get("results", []), history=history)
+        steps[2]["state"] = "done"
+        steps[2]["detail"] = "done"
+        steps[2]["t"] = time.time() - t2
+        render()
 
     else:
         # URASys agentic pipeline
@@ -684,17 +754,17 @@ def _interactive_search(query: str, strategy: str = "urasys", top_k: int = 5, hi
     print(f"\n\n  {C.BG_DK}{C.BOLD} Results — {total:.2f}s total {C.RESET}\n")
 
     if is_baseline:
-        # Simple ranked list for baselines
+        # Show retrieved passages
         if result["results"]:
+            print(f"  {C.BLUE}{C.BOLD}Retrieved Passages{C.RESET}")
             for i, r in enumerate(result["results"][:5]):
-                src_tag = f"{C.PURPLE}FAQ{C.RESET}" if r["source"] == "faq" else f"{C.BLUE}DOC{C.RESET}"
                 sc = f"{C.DIM}[{r['score']:.4f}]{C.RESET}"
-                print(f"    {C.BOLD}{i+1}.{C.RESET} {src_tag} {sc}  {_trunc(r['text'], 75)}")
-                if r.get("detail"):
-                    print(f"       {C.DIM}Q: {_trunc(r['detail'], 70)}{C.RESET}")
+                print(f"    {C.BOLD}{i+1}.{C.RESET} {sc}  {_trunc(r['text'], 75)}")
         else:
             print(f"    {C.RED}(no results){C.RESET}")
-        print(f"\n    {C.BOLD}Answer:{C.RESET} {C.GREEN}{_trunc(result.get('predicted_answer', ''), 100)}{C.RESET}")
+        # Show LLM-generated answer
+        print(f"\n  {C.BG_DK}{C.BOLD} Final Answer {C.RESET}\n")
+        print(f"  {C.GREEN}{result.get('predicted_answer', '')}{C.RESET}")
     else:
         # URASys: show FAQ agent + Document agent details
         print(f"  {C.PURPLE}{C.BOLD}FAQ Search Agent{C.RESET}  {C.DIM}({result.get('faq_attempts', '?')} rounds){C.RESET}")
@@ -791,6 +861,9 @@ def _run_one(query: str, strategy: str, top_k: int) -> dict:
         res["predicted_answer"] = res["final_answer"] or _best_answer(res)
     else:
         res = {"query": query, "results": [], "predicted_answer": ""}
+    # Baseline strategies: generate answer via LLM (standard RAG)
+    if strategy in ("bm25", "dense", "hybrid"):
+        res["predicted_answer"] = _baseline_generate(query, res.get("results", []))
     res["elapsed"] = round(time.time() - t0, 2)
     return res
 
