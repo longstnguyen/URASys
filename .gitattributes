@@ -1,0 +1,14 @@
+# Ensure consistent line endings
+* text=auto
+
+# Force CSV files to be treated as text with LF endings
+*.csv text eol=lf
+
+# Force Python/JS/TS as text
+*.py text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.tex text eol=lf
