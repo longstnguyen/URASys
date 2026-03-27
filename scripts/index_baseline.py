@@ -9,19 +9,19 @@ Uses the SAME Milvus document schema as URASys but stores in a
 SEPARATE collection (default: baseline_document_data).
 
 Usage:
-    # Index 100 samples from Viquad2 (overwrites)
+    # Index 100 samples from ViQuAD2 (overwrites)
     python scripts/index_baseline.py \\
-        --dataset datasets/Viquad2_1000.csv --n 100
+        --dataset datasets/ViQuAD2_1000.csv --n 100
 
     # Custom collection name + chunk size
     python scripts/index_baseline.py \\
-        --dataset datasets/Viquad2_1000.csv --n 100 \\
+        --dataset datasets/ViQuAD2_1000.csv --n 100 \\
         --doc-collection baseline_doc \\
         --chunk-size 500 --chunk-overlap 50
 
     # Append mode
     python scripts/index_baseline.py \\
-        --dataset datasets/Viquad2_1000.csv --n 50 --mode insert
+        --dataset datasets/ViQuAD2_1000.csv --n 50 --mode insert
 """
 import ast
 import json

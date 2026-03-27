@@ -5,7 +5,7 @@ We present a curated suite of Question Answering (QA) datasets specifically desi
 To ensure consistency, each dataset is distributed in a unified CSV format with two main variants:
 
 - **Standard QA sets (`*_1000.csv`)**: Balanced subsets for general answerability evaluation.
-- **Ambiguity-focused subsets (`*_ambious.csv`)**: Specifically curated to test model behavior on underspecified or multi-interpretation queries.
+- **Ambiguity-focused subsets (`*_ambiguous.csv`)**: Specifically curated to test model behavior on underspecified or multi-interpretation queries.
 
 ## Dataset Descriptions
 
@@ -24,11 +24,11 @@ VIMQA is a Vietnamese multi-hop QA dataset introduced at LREC 2022 with over 15,
   *For public datasets, we sample 1,000 test-set examples per dataset. For SQuAD 2.0 and UIT-ViQuAD 2.0, the sampling process guarantees inclusion of the unanswerable subsets.*
 
 - **UniQA**  
-UniQA is a custom dataset of real-world Vietnamese student queries on university admissions. Each question links to official academic documents, reflecting URASys’s target deployment scenario. Only a 2-sample preview is available during peer review; the full release follows paper acceptance.
+UniQA is a custom dataset of real-world Vietnamese student queries on university admissions. Each question links to official academic documents, reflecting URASys's target deployment scenario.
 
 ## Ambiguity Subset Construction
 
-The `*_ambious.csv` files are not direct subsets but are generated to probe model performance on underspecified inputs. The pipeline:
+The `*_ambiguous.csv` files are not direct subsets but are generated to probe model performance on underspecified inputs. The pipeline:
 
 **1.** **Source Selection:** Start from the base QA dataset (e.g., SQuAD 2.0, ViQuAD 2.0).  
 
@@ -56,10 +56,10 @@ Each ambiguous record contains:
 | Variant         | File Pattern           | Fields                                                       |
 |-----------------|------------------------|--------------------------------------------------------------|
 | Standard (answerable and unanswerable)        | `*_1000.csv`           | `question`, `answer`, `paragraph`                           |
-| Ambiguous       | `*_ambious.csv`        | `question`, `answer`, `paragraph`, `info`                   |
-| UniQA (hidden)  | `UniQA_*.csv`          | `question`, `answer`, `paragraph`, `info`; only 2 rows visible |
+| Ambiguous       | `*_ambiguous.csv`      | `question`, `answer`, `paragraph`, `info`                   |
+| UniQA Standard  | `UniQA_1000.csv`       | `question`, `answer`                                         |
+| UniQA Ambiguous | `UniQA_ambiguous.csv`  | `question`, `info`, `ambiguity_type`, `paragraph`            |
 
-> For UniQA, all rows beyond the first two are anonymized with a placeholder message.
 
 ## Dataset Statistics
 
@@ -69,18 +69,18 @@ Each ambiguous record contains:
 | UIT-ViQuAD 2.0     | 800        | 200          | 731       |
 | HotpotQA           | 1000       | 0            | 0         |
 | VIMQA              | 1000       | 0            | 0         |
-| UniQA              | 500        | 500          | 314       |
+| UniQA              | 497        | 503          | 314       |
 
 ## File List
 
-- `Hotpot_1000.csv`
-- `Squad2_1000.csv`
-- `Squad2_ambious.csv`
-- `Viquad2_1000.csv`
-- `Viquad2_ambious.csv`
-- `VimQA_1000.csv`
-- `UniQA_1000_anonymous.csv`
-- `UniQA_ambious_anonymous.csv`
+- `HotpotQA_1000.csv`
+- `SQuAD2_1000.csv`
+- `SQuAD2_ambiguous.csv`
+- `ViQuAD2_1000.csv`
+- `ViQuAD2_ambiguous.csv`
+- `VIMQA_1000.csv`
+- `UniQA_1000.csv`
+- `UniQA_ambiguous.csv`
 
 ## Field Definitions
 
@@ -124,7 +124,7 @@ Each ambiguous record contains:
 ```python
 import pandas as pd
 
-df = pd.read_csv("Squad2_ambious.csv")
+df = pd.read_csv("SQuAD2_ambiguous.csv")
 print(df[['question', 'answer', 'info']].head())
 ```
 

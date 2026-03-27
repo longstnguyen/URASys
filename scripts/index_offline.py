@@ -3,7 +3,7 @@ Offline indexing script - index datasets directly without starting a server.
 
 Usage:
     python scripts/index_offline.py \
-        --dataset datasets/Hotpot_1000.csv \
+        --dataset datasets/HotpotQA_1000.csv \
         --n 5 \
         --mode index
 

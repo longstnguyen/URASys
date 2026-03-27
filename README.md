@@ -134,7 +134,6 @@ URASys/
 ├── src/urasys/
 │   ├── config/                    # System & model configuration
 │   ├── core/
-│   │   ├── agents/                # Manager agent (legacy ADK wrappers — unused)
 │   │   ├── model_clients/         # LLM, Embedder, BM25 clients
 │   │   └── retriever/             # FAQ & Document retrievers (hybrid RRF)
 │   ├── indexing/                  # Document chunking, FAQ generation
@@ -146,12 +145,13 @@ URASys/
 │   │   ├── document_server/       # MCP document retrieval (port 8012)
 │   │   ├── copilotkit_server/     # Main backend + sub-agent LLM loops (port 8005)
 │   │   └── index_server/          # Index management
-│   ├── utils/                     # DB clients (Milvus/LanceDB), embeddings
-│   └── workflow/                  # build_index, chatbot_inference
+│   ├── utils/                     # DB clients (Milvus), embeddings
+│   └── workflow/                  # build_index pipeline
 ├── frontend/                      # Next.js + CopilotKit chat UI
-├── datasets/                      # Evaluation datasets
-├── scripts/                       # Utility scripts
-└── environments/                  # .env files
+├── datasets/                      # Evaluation datasets (SQuAD2, ViQuAD2, HotpotQA, VIMQA, UniQA)
+├── scripts/                       # Offline indexing, baseline, evaluation CLI
+├── environments/                  # .env files
+└── tests/
 ```
 
 ---
@@ -160,5 +160,4 @@ URASys/
 
 - **Sub-Agents are LLM loops, not simple retrievers.** Each sub-agent issues tool calls iteratively (up to 3 rounds), reformulating its search query if results are unsatisfactory. This matches the paper's Algorithm 1.
 - **Manager only sees grounded text.** The `faq_answer` / `doc_answer` fields from sub-agents are what the Manager uses to decide PATH A/B/C/D — not raw chunk lists.
-- **No ADK dependency.** The system was originally built with Google ADK; inference now runs via `google-genai` SDK directly with CopilotKit managing the Manager Agent turn.
 

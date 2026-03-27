@@ -14,16 +14,16 @@ Interactive mode:
 
 Eval mode:
     # Compare all strategies on 50 samples (LLM-as-a-Judge, default)
-    python scripts/eval_batch.py eval --dataset datasets/Squad2_1000.csv --n 50
+    python scripts/eval_batch.py eval --dataset datasets/SQuAD2_1000.csv --n 50
 
     # Also compute EM/F1 (only recommended for normal answerable datasets)
-    python scripts/eval_batch.py eval --dataset datasets/Squad2_1000.csv --n 50 --em-f1
+    python scripts/eval_batch.py eval --dataset datasets/SQuAD2_1000.csv --n 50 --em-f1
 
     # Ambiguous dataset — auto-detected via 'info' column, LLM-as-a-Judge only
-    python scripts/eval_batch.py eval --dataset datasets/Squad2_ambious.csv --n 50
+    python scripts/eval_batch.py eval --dataset datasets/SQuAD2_ambiguous.csv --n 50
 
     # Export results (always saved to --output, default: results/<dataset>_<strategy>_<timestamp>.json)
-    python scripts/eval_batch.py eval --dataset datasets/Squad2_1000.csv --n 100 --output results.json
+    python scripts/eval_batch.py eval --dataset datasets/SQuAD2_1000.csv --n 100 --output results.json
 """
 import argparse
 import asyncio
